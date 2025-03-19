@@ -27,16 +27,19 @@ const parkLocations = [
 let treeMarkers = [];
 let plankMarkers = [];
 let rockMarkers = [];
-let woodCount = 0; // 所持している木の数
-let plankCount = 0; // 所持している板材の数
-let rockCount = 0; // 所持している石の数
-let stickCount = 0; // 所持している棒の数
-let workbenchCount = 0; // 所持している作業台の数
-let woodenPickaxeCount = 0; // 所持している木のツルハシの数
-let item5Count = 0;
-let item6Count = 0;
-let item7Count = 0;
-let item8Count = 0;
+// インベントリアイテムカウント（全てのアイテムを一つの配列で管理）
+let inventoryCounts = {
+    "wood": 0,
+    "plank": 0,
+    "stick": 0,
+    "workbench": 0,
+    "wooden_pickaxe": 0,
+    "rock": 0,
+    "item5": 0,
+    "item6": 0,
+    "item7": 0
+};
+
 // アイテムとアイコンの対応
 const itemIcons = {
     "wood": "🪵",
@@ -50,6 +53,23 @@ const itemIcons = {
     "item7": "🗡️",
     "item8": "🏹"
 };
+
+// アイテム名（日本語）
+const itemNames = {
+    "wood": "原木",
+    "plank": "板材",
+    "stick": "棒",
+    "workbench": "作業台",
+    "wooden_pickaxe": "木のツルハシ",
+    "rock": "石",
+    "item5": "",
+    "item6": "",
+    "item7": ""
+};
+
+// アイテムタイプの順番（左詰め順）
+const itemOrdering = ["wood", "plank", "stick", "workbench", "wooden_pickaxe", "rock", "item5", "item6", "item7"];
+
 // 公園の位置に資源を配置
 parkLocations.forEach(location => {
     const [lat, lng, name, resourceType] = location;
@@ -106,15 +126,15 @@ parkLocations.forEach(location => {
                 let count = 2;
                 let message = `【${name}】で`;
                 if (resourceType === "wood") {
-                    woodCount += count;
+                    inventoryCounts.wood += count;
                     message += `原木を${count}つ`;
                     treeMarkers = treeMarkers.filter(obj => obj !== marker);
                 } else if (resourceType === "plank") {
-                    plankCount += count;
+                    inventoryCounts.plank += count;
                     message += `板材を${count}つ`;
                     plankMarkers = plankMarkers.filter(obj => obj !== marker);
                 } else if (resourceType === "rock") {
-                    rockCount += count;
+                    inventoryCounts.rock += count;
                     message += `石を${count}つ`;
                     rockMarkers = rockMarkers.filter(obj => obj !== marker);
                 }
@@ -172,72 +192,52 @@ let selectedSlots = [];
 let selectedItem = 'wood'; // 初期選択アイテムはwood
 // クラフト素材が使用済みかどうかのフラグ
 let materialsUsed = false;
-const inventorySlots = ["wood", "plank", "stick", "workbench", "wooden_pickaxe", "rock", "item5", "item6", "item7"];
 
+// インベントリを左詰め表示に更新する関数
 function updateInventory() {
     // デバッグ用: 更新前のインベントリ状態をログに出力
-    console.log("インベントリ更新前:", {
-        wood: woodCount,
-        plank: plankCount,
-        stick: stickCount,
-        workbench: workbenchCount,
-        wooden_pickaxe: woodenPickaxeCount,
-        rock: rockCount,
-        item5: item5Count,
-        item6: item6Count,
-        item7: item7Count
+    console.log("インベントリ更新前:", inventoryCounts);
+
+    // アイテムの順番に基づいて、実際のインベントリの有効なアイテムリストを作成
+    const activeItems = [];
+    itemOrdering.forEach(itemType => {
+        if (inventoryCounts[itemType] > 0) {
+            activeItems.push({
+                type: itemType,
+                count: inventoryCounts[itemType],
+                icon: itemIcons[itemType],
+                name: itemNames[itemType]
+            });
+        }
     });
 
     // マップ画面のインベントリアイテムを取得
     const mapInventoryItems = document.querySelectorAll('.inventory > .inventory-item');
 
-    // マップ画面のインベントリ更新
-    mapInventoryItems.forEach((item, index) => {
-        if (index < inventorySlots.length) {
-            const itemType = inventorySlots[index];
-            let count = 0;
-            let icon = '';
+    // 全てのインベントリスロットをクリア
+    mapInventoryItems.forEach(item => {
+        const iconSpan = item.querySelector('span:first-child');
+        const countSpan = item.querySelector('span:nth-child(2)');
+        const nameDiv = item.querySelector('.item-name');
 
-            if (itemType === "wood") {
-                count = woodCount;
-                icon = itemIcons["wood"];
-            } else if (itemType === "plank") {
-                count = plankCount;
-                icon = itemIcons["plank"];
-            } else if (itemType === "stick") {
-                count = stickCount;
-                icon = itemIcons["stick"];
-            } else if (itemType === "workbench") {
-                count = workbenchCount;
-                icon = itemIcons["workbench"];
-            } else if (itemType === "wooden_pickaxe") {
-                count = woodenPickaxeCount;
-                icon = itemIcons["wooden_pickaxe"];
-            } else if (itemType === "rock") {
-                count = rockCount;
-                icon = itemIcons["rock"];
-            } else if (itemType === "item5") {
-                count = item5Count;
-                icon = itemIcons["item5"];
-            } else if (itemType === "item6") {
-                count = item6Count;
-                icon = itemIcons["item6"];
-            } else if (itemType === "item7") {
-                count = item7Count;
-                icon = itemIcons["item7"];
-            }
+        iconSpan.textContent = '';
+        countSpan.textContent = '';
+        item.setAttribute('data-item', '');
+        nameDiv.textContent = '';
+    });
 
-            // アイコンと数量を更新
-            const iconSpan = item.querySelector('span:first-child');
-            const countSpan = item.querySelector('span:nth-child(2)');
+    // 左詰めでアイテムを表示
+    activeItems.forEach((item, index) => {
+        if (index < mapInventoryItems.length) {
+            const slot = mapInventoryItems[index];
+            const iconSpan = slot.querySelector('span:first-child');
+            const countSpan = slot.querySelector('span:nth-child(2)');
+            const nameDiv = slot.querySelector('.item-name');
 
-            if (count > 0) {
-                iconSpan.textContent = icon;
-                countSpan.textContent = count;
-            } else {
-                iconSpan.textContent = '';
-                countSpan.textContent = '';
-            }
+            iconSpan.textContent = item.icon;
+            countSpan.textContent = item.count;
+            slot.setAttribute('data-item', item.type);
+            nameDiv.textContent = item.name;
         }
     });
 
@@ -247,14 +247,7 @@ function updateInventory() {
     }
 
     // デバッグ用: 更新後のインベントリ表示をログに出力
-    console.log("インベントリ更新後の表示 (Map):", Array.from(mapInventoryItems).map(item => {
-        const iconSpan = item.querySelector('span:first-child');
-        const countSpan = item.querySelector('span:nth-child(2)');
-        return {
-            icon: iconSpan.textContent,
-            count: countSpan.textContent
-        };
-    }));
+    console.log("インベントリ更新後の表示:", activeItems);
 }
 
 // クラフト画面用のインベントリを更新する関数
@@ -262,126 +255,77 @@ function updateCraftInventory() {
     const craftInventory = document.getElementById('craft-inventory');
     craftInventory.innerHTML = ''; // 既存の内容をクリア
 
-    // インベントリアイテムを作成
-    inventorySlots.forEach((itemType, index) => {
-        const item = document.createElement('div');
-        item.className = 'inventory-item';
-        item.setAttribute('data-item', itemType);
+    // アイテムの順番に基づいて、実際のインベントリの有効なアイテムリストを作成
+    const activeItems = [];
 
-        const iconSpan = document.createElement('span');
-        iconSpan.style.fontSize = '24px';
-        iconSpan.style.lineHeight = '48px';
-
-        const countSpan = document.createElement('span');
-
-        const itemName = document.createElement('div');
-        itemName.className = 'item-name';
-
-        let count = 0;
-        let icon = '';
-        let nameText = '';
-
-        if (itemType === "wood") {
-            count = woodCount;
-            icon = itemIcons["wood"];
-            nameText = '原木';
-        } else if (itemType === "plank") {
-            count = plankCount;
-            icon = itemIcons["plank"];
-            nameText = '板材';
-        } else if (itemType === "stick") {
-            count = stickCount;
-            icon = itemIcons["stick"];
-            nameText = '棒';
-        } else if (itemType === "workbench") {
-            count = workbenchCount;
-            icon = itemIcons["workbench"];
-            nameText = '作業台';
-        } else if (itemType === "wooden_pickaxe") {
-            count = woodenPickaxeCount;
-            icon = itemIcons["wooden_pickaxe"];
-            nameText = '木のツルハシ';
-        } else if (itemType === "rock") {
-            count = rockCount;
-            icon = itemIcons["rock"];
-            nameText = '石';
-        } else if (itemType === "item5") {
-            count = item5Count;
-            icon = itemIcons["item5"];
-            nameText = '';
-        } else if (itemType === "item6") {
-            count = item6Count;
-            icon = itemIcons["item6"];
-            nameText = '';
-        } else if (itemType === "item7") {
-            count = item7Count;
-            icon = itemIcons["item7"];
-            nameText = '';
+    itemOrdering.forEach(itemType => {
+        if (inventoryCounts[itemType] > 0) {
+            activeItems.push({
+                type: itemType,
+                count: inventoryCounts[itemType],
+                icon: itemIcons[itemType],
+                name: itemNames[itemType]
+            });
         }
+    });
 
-        if (count > 0) {
-            iconSpan.textContent = icon;
-            countSpan.textContent = count;
+    // 9個のスロットを作成（アイテムがあるものとないもの）
+    for (let i = 0; i < 9; i++) {
+        let item;
 
-            // アイテムが存在する場合のみクリックイベントを追加
+        if (i < activeItems.length) {
+            // アイテムがあるスロット
+            item = document.createElement('div');
+            item.className = 'inventory-item';
+            item.setAttribute('data-item', activeItems[i].type);
+
+            const iconSpan = document.createElement('span');
+            iconSpan.style.fontSize = '24px';
+            iconSpan.style.lineHeight = '48px';
+            iconSpan.textContent = activeItems[i].icon;
+
+            const countSpan = document.createElement('span');
+            countSpan.textContent = activeItems[i].count;
+
+            const itemName = document.createElement('div');
+            itemName.className = 'item-name';
+            itemName.textContent = activeItems[i].name;
+
+            // アイテムクリックイベントを追加
             item.addEventListener('click', () => {
                 // アイテムを素材スロットにセット
-                addItemToGrid(itemType, icon);
+                addItemToGrid(activeItems[i].type, activeItems[i].icon);
 
-                // 視覚的なフィードバック（オプション）
+                // 視覚的なフィードバック
                 document.querySelectorAll('#craft-inventory .inventory-item').forEach(el => {
                     el.style.border = '1px solid #9ca3af';
                 });
                 item.style.border = '2px solid #3b82f6';
             });
+
+            item.appendChild(iconSpan);
+            item.appendChild(countSpan);
+            item.appendChild(itemName);
+        } else {
+            // 空のスロット
+            item = document.createElement('div');
+            item.className = 'empty-slot';
         }
 
-        itemName.textContent = nameText;
-
-        item.appendChild(iconSpan);
-        item.appendChild(countSpan);
-        item.appendChild(itemName);
-
         craftInventory.appendChild(item);
-    });
+    }
 
     // デバッグ用: クラフト画面のインベントリ更新をログ
     console.log("クラフト画面インベントリ更新:", {
-        wood: woodCount,
-        plank: plankCount,
-        stick: stickCount,
-        workbench: workbenchCount,
-        wooden_pickaxe: woodenPickaxeCount,
-        rock: rockCount,
-        item5: item5Count,
-        item6: item6Count,
-        item7: item7Count
+        activeItems: activeItems.length,
+        totalSlots: 9
     });
 }
 
 // インベントリからグリッドにアイテムを追加する関数
 function addItemToGrid(itemType, icon) {
     // 対応するアイテムの所持数をチェック
-    let itemCount = 0;
-    if (itemType === "wood") {
-        itemCount = woodCount;
-    } else if (itemType === "plank") {
-        itemCount = plankCount;
-    } else if (itemType === "stick") {
-        itemCount = stickCount;
-    } else if (itemType === "workbench") {
-        itemCount = workbenchCount;
-    } else if (itemType === "wooden_pickaxe") {
-        itemCount = woodenPickaxeCount;
-    } else if (itemType === "rock") {
-        itemCount = rockCount;
-    } else if (itemType === "item5") {
-        itemCount = item5Count;
-    } else if (itemType === "item6") {
-        itemCount = item6Count;
-    } else if (itemType === "item7") {
-        itemCount = item7Count;
-    }
+    const itemCount = inventoryCounts[itemType];
 
     // アイテムが1つ以上あるか確認
     if (itemCount <= 0) {
@@ -408,29 +352,10 @@ function addItemToGrid(itemType, icon) {
         }
 
         // アイテムカウントを減らす
-        if (itemType === "wood") {
-            woodCount--;
-        } else if (itemType === "plank") {
-            plankCount--;
-        } else if (itemType === "stick") {
-            stickCount--;
-        } else if (itemType === "workbench") {
-            workbenchCount--;
-        } else if (itemType === "wooden_pickaxe") {
-            woodenPickaxeCount--;
-        } else if (itemType === "rock") {
-            rockCount--;
-        } else if (itemType === "item5") {
-            item5Count--;
-        } else if (itemType === "item6") {
-            item6Count--;
-        } else if (itemType === "item7") {
-            item7Count--;
-        }
+        inventoryCounts[itemType]--;
 
         // インベントリ表示を更新
         updateInventory();
-        updateCraftInventory();
 
         // クラフト結果を更新
         updateCraftResult();
@@ -475,24 +400,8 @@ closeButton.addEventListener('click', () => {
                 const itemType = slot.getAttribute('data-item-type');
 
                 // アイテムをインベントリに戻す（クラフトをキャンセルした場合）
-                if (itemType === "wood") {
-                    woodCount++;
-                } else if (itemType === "plank") {
-                    plankCount++;
-                } else if (itemType === "stick") {
-                    stickCount++;
-                } else if (itemType === "workbench") {
-                    workbenchCount++;
-                } else if (itemType === "wooden_pickaxe") {
-                    woodenPickaxeCount++;
-                } else if (itemType === "rock") {
-                    rockCount++;
-                } else if (itemType === "item5") {
-                    item5Count++;
-                } else if (itemType === "item6") {
-                    item6Count++;
-                } else if (itemType === "item7") {
-                    item7Count++;
+                if (itemType) {
+                    inventoryCounts[itemType]++;
                 }
 
                 // スロットをリセット
@@ -509,15 +418,7 @@ closeButton.addEventListener('click', () => {
 
     // デバッグ用: 現在のインベントリ状態をログに出力
     console.log("閉じる時のインベントリ状態:", {
-        wood: woodCount,
-        plank: plankCount,
-        stick: stickCount,
-        workbench: workbenchCount,
-        wooden_pickaxe: woodenPickaxeCount,
-        rock: rockCount,
-        item5: item5Count,
-        item6: item6Count,
-        item7: item7Count,
+        ...inventoryCounts,
         materialsUsed: materialsUsed
     });
 
@@ -537,24 +438,8 @@ craftGrid.addEventListener('click', (event) => {
             const itemType = slot.getAttribute('data-item-type');
 
             // アイテムをインベントリに戻す
-            if (itemType === "wood") {
-                woodCount++;
-            } else if (itemType === "plank") {
-                plankCount++;
-            } else if (itemType === "stick") {
-                stickCount++;
-            } else if (itemType === "workbench") {
-                workbenchCount++;
-            } else if (itemType === "wooden_pickaxe") {
-                woodenPickaxeCount++;
-            } else if (itemType === "rock") {
-                rockCount++;
-            } else if (itemType === "item5") {
-                item5Count++;
-            } else if (itemType === "item6") {
-                item6Count++;
-            } else if (itemType === "item7") {
-                item7Count++;
+            if (itemType) {
+                inventoryCounts[itemType]++;
             }
 
             // スロットをリセット
@@ -564,7 +449,6 @@ craftGrid.addEventListener('click', (event) => {
 
             // インベントリとクラフト結果を更新
             updateInventory();
-            updateCraftInventory();
             updateCraftResult();
         }
     }
@@ -653,19 +537,19 @@ craftResult.addEventListener('click', () => {
 
         if (recipe === 'wood-to-plank') {
             // 木材1つを消費して板材4つを作成
-            plankCount += 4;
+            inventoryCounts.plank += 4;
             alert('板材4個をクラフトしました！');
         } else if (recipe === 'plank-to-workbench') {
             // 板材4つを消費して作業台1つを作成
-            workbenchCount += 1;
+            inventoryCounts.workbench += 1;
             alert('作業台をクラフトしました！');
         } else if (recipe === 'plank-to-stick') {
             // 板材2つを消費して棒1つを作成
-            stickCount += 1;
+            inventoryCounts.stick += 1;
             alert('棒をクラフトしました！');
         } else if (recipe === 'wooden-pickaxe') {
             // 板材3つと棒2つを消費して木のツルハシ1つを作成
-            woodenPickaxeCount += 1;
+            inventoryCounts.wooden_pickaxe += 1;
             alert('木のツルハシをクラフトしました！');
         }
 
@@ -691,19 +575,10 @@ craftResult.addEventListener('click', () => {
 
         // インベントリを更新
         updateInventory();
-        updateCraftInventory();
 
         // デバッグ用: クラフト完了時のインベントリ状態
         console.log("クラフト完了時のインベントリ状態:", {
-            wood: woodCount,
-            plank: plankCount,
-            stick: stickCount,
-            workbench: workbenchCount,
-            wooden_pickaxe: woodenPickaxeCount,
-            rock: rockCount,
-            item5: item5Count,
-            item6: item6Count,
-            item7: item7Count,
+            ...inventoryCounts,
             materialsUsed: materialsUsed
         });
     }

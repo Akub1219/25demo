@@ -210,6 +210,9 @@
     /* より濃い赤 */
 }
 
+
+/* マップ画面のインベントリをクラフト画面と同様に横一列表示に変更 */
+
 .inventory {
     position: fixed;
     bottom: 80px;
@@ -219,14 +222,17 @@
     background-color: #e5e7eb;
     padding: 10px;
     border-radius: 10px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    /* gridからflexに変更 */
+    flex-wrap: wrap;
+    /* 必要に応じて折り返し */
     gap: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     min-width: 200px;
     padding-top: 10px;
     padding-bottom: 10px;
-    align-items: start;
+    justify-content: center;
+    /* 中央揃え */
 }
 
 .inventory-item {
@@ -236,10 +242,8 @@
     border: 1px solid #9ca3af;
     border-radius: 5px;
     display: flex;
-    /* 追加 */
     flex-direction: column;
     align-items: center;
-    /* 追加 */
     justify-content: center;
     font-size: 16px;
     user-select: none;
@@ -294,7 +298,27 @@
     padding: 10px;
     border-radius: 10px;
     min-width: 200px;
+    max-width: 600px;
     flex-wrap: wrap;
     justify-content: center;
     z-index: 1002;
+}
+
+
+/* 空のインベントリスロット用のスタイル */
+
+.empty-slot {
+    width: 48px;
+    height: 48px;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    user-select: none;
+    position: relative;
+    margin-bottom: 30px;
 }
