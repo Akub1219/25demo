@@ -281,6 +281,20 @@
         .inventory-item:hover .item-name {
             opacity: 1;
         }
+        /* クラフト画面内のインベントリ用スタイル */
+        
+        #craft-inventory {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            background-color: #e5e7eb;
+            padding: 10px;
+            border-radius: 10px;
+            min-width: 200px;
+            flex-wrap: wrap;
+            justify-content: center;
+            z-index: 1002;
+        }
     </style>
 </head>
 
@@ -299,6 +313,8 @@
             </div>
             <div id="craft-result" class=""></div>
         </div>
+        <!-- クラフト画面内にインベントリコンテナを追加 -->
+        <div id="craft-inventory" class="inventory-container mt-4"></div>
         <button class="close-button">閉じる</button>
     </div>
     <div class="inventory">
@@ -529,8 +545,79 @@
                 }
             });
         }
+
+        // クラフト画面用のインベントリを更新する関数
+        function updateCraftInventory() {
+            const craftInventory = document.getElementById('craft-inventory');
+            craftInventory.innerHTML = ''; // 既存の内容をクリア
+
+            // インベントリアイテムを作成
+            inventorySlots.forEach((itemType, index) => {
+                const item = document.createElement('div');
+                item.className = 'inventory-item';
+                item.setAttribute('data-item', itemType);
+
+                const iconSpan = document.createElement('span');
+                iconSpan.style.fontSize = '24px';
+                iconSpan.style.lineHeight = '48px';
+
+                const countSpan = document.createElement('span');
+
+                const itemName = document.createElement('div');
+                itemName.className = 'item-name';
+
+                let count = 0;
+                let icon = '';
+                let nameText = '';
+
+                if (itemType === "wood") {
+                    count = woodCount;
+                    icon = itemIcons["wood"];
+                    nameText = '原木';
+                } else if (itemType === "plank") {
+                    count = plankCount;
+                    icon = itemIcons["plank"];
+                    nameText = '板材';
+                } else if (itemType === "rock") {
+                    count = rockCount;
+                    icon = itemIcons["rock"];
+                    nameText = '石';
+                } else if (itemType === "item4") {
+                    count = item4Count;
+                    icon = itemIcons["item4"];
+                    nameText = '';
+                }
+
+                if (count > 0) {
+                    iconSpan.textContent = icon;
+                    countSpan.textContent = count;
+                }
+
+                itemName.textContent = nameText;
+
+                item.appendChild(iconSpan);
+                item.appendChild(countSpan);
+                item.appendChild(itemName);
+
+                // アイテム選択のイベントリスナー
+                item.addEventListener('click', () => {
+                    if (count > 0) {
+                        selectedItem = itemType;
+                        // 視覚的なフィードバック（オプション）
+                        document.querySelectorAll('#craft-inventory .inventory-item').forEach(el => {
+                            el.style.border = '1px solid #9ca3af';
+                        });
+                        item.style.border = '2px solid #3b82f6';
+                    }
+                });
+
+                craftInventory.appendChild(item);
+            });
+        }
+
         // 初期状態でインベントリを更新
         updateInventory();
+
         craftButton.addEventListener('click', () => {
             craftScreen.style.display = 'flex';
             selectedSlots = [];
@@ -540,10 +627,17 @@
                 slot.classList.remove('active');
                 slot.textContent = ''; // アイテム表示を消去
             });
+
+            // インベントリをクラフト画面にコピー
+            updateCraftInventory();
         });
+
         closeButton.addEventListener('click', () => {
             craftScreen.style.display = 'none';
+            // マップ画面のインベントリを更新
+            updateInventory();
         });
+
         craftGrid.addEventListener('click', (event) => {
             const slot = event.target;
             if (slot.classList.contains('craft-slot')) {
@@ -578,12 +672,14 @@
                 craftResult.classList.remove('active');
             }
         }
+
         craftResult.addEventListener('click', () => {
             if (craftResult.classList.contains('active')) {
                 if (woodCount >= 1) { // 木が1個以上必要
                     woodCount -= 1;
                     plankCount += 4;
                     updateInventory();
+                    updateCraftInventory(); // クラフト画面のインベントリも更新
                     selectedSlots = []; // リセット
                     Array.from(craftGrid.children).forEach(slot => {
                         slot.classList.remove('active');
