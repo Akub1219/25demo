@@ -20,6 +20,7 @@
     <div id="map"></div>
     <div id="character" class="character-icon">👦</div>
     <button id="craft-button" class="craft-button">クラフト</button>
+    <!-- 通常のクラフト画面 (2x2グリッド) -->
     <div id="craft-screen" class="fixed">
         <h2 class="text-xl text-white mb-4">クラフト画面</h2>
         <div id="craft-area">
@@ -35,6 +36,26 @@
         <div id="craft-inventory" class="inventory-container mt-4"></div>
         <button class="close-button">閉じる</button>
     </div>
+
+    <!-- 作業台のクラフト画面 (3x2グリッド) -->
+    <div id="workbench-screen" class="fixed">
+        <h2 class="text-xl text-white mb-4">作業台</h2>
+        <div id="workbench-area">
+            <div id="workbench-grid">
+                <div class="craft-slot" data-x="0" data-y="0"></div>
+                <div class="craft-slot" data-x="1" data-y="0"></div>
+                <div class="craft-slot" data-x="2" data-y="0"></div>
+                <div class="craft-slot" data-x="0" data-y="1"></div>
+                <div class="craft-slot" data-x="1" data-y="1"></div>
+                <div class="craft-slot" data-x="2" data-y="1"></div>
+            </div>
+            <div id="workbench-result" class=""></div>
+        </div>
+        <!-- 作業台画面内にインベントリコンテナを追加 -->
+        <div id="workbench-inventory" class="inventory-container mt-4"></div>
+        <button class="close-workbench-button">閉じる</button>
+    </div>
+
     <div class="inventory">
         <div class="inventory-item" data-item="wood">
             <span id="wood-count" style="font-size: 24px; line-height: 48px;"></span>
@@ -82,7 +103,11 @@
             <div class="item-name"></div>
         </div>
     </div>
-    <script src="js/script.js"></script>
+
+    <!-- JavaScriptファイルを分割して読み込み -->
+    <script src="js/main.js"></script>
+    <script src="js/craft.js"></script>
+    <script src="js/workbench.js"></script>
 </body>
 
 </html>
