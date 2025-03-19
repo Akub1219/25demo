@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>リアルクラフトゲーム</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="bg-gray-100 font-sans antialiased">
+    <div id="map"></div>
+    <div id="character" class="character-icon">👦</div>
+    <button id="craft-button" class="craft-button">クラフト</button>
+    <div id="craft-screen" class="fixed">
+        <h2 class="text-xl text-white mb-4">クラフト画面</h2>
+        <div id="craft-area">
+            <div id="craft-grid">
+                <div class="craft-slot" data-x="0" data-y="0"></div>
+                <div class="craft-slot" data-x="1" data-y="0"></div>
+                <div class="craft-slot" data-x="0" data-y="1"></div>
+                <div class="craft-slot" data-x="1" data-y="1"></div>
+            </div>
+            <div id="craft-result" class=""></div>
+        </div>
+        <!-- クラフト画面内にインベントリコンテナを追加 -->
+        <div id="craft-inventory" class="inventory-container mt-4"></div>
+        <button class="close-button">閉じる</button>
+    </div>
+    <div class="inventory">
+        <div class="inventory-item" data-item="wood">
+            <span id="wood-count" style="font-size: 24px; line-height: 48px;"></span>
+            <span id="wood-count-number"></span>
+            <div class="item-name">原木</div>
+        </div>
+        <div class="inventory-item" data-item="plank">
+            <span id="plank-count" style="line-height: 48px;"></span>
+            <span id="plank-count-number"></span>
+            <div class="item-name">板材</div>
+        </div>
+        <div class="inventory-item" data-item="stick">
+            <span id="stick-count" style="line-height: 48px;"></span>
+            <span id="stick-count-number"></span>
+            <div class="item-name">棒</div>
+        </div>
+        <div class="inventory-item" data-item="workbench">
+            <span id="workbench-count" style="line-height: 48px;"></span>
+            <span id="workbench-count-number"></span>
+            <div class="item-name">作業台</div>
+        </div>
+        <div class="inventory-item" data-item="wooden_pickaxe">
+            <span id="wooden-pickaxe-count" style="line-height: 48px;"></span>
+            <span id="wooden-pickaxe-count-number"></span>
+            <div class="item-name">木のツルハシ</div>
+        </div>
+        <div class="inventory-item" data-item="rock">
+            <span id="rock-count" style="line-height: 48px;"></span>
+            <span id="rock-count-number"></span>
+            <div class="item-name">石</div>
+        </div>
+        <div class="inventory-item" data-item="item5">
+            <span id="item5-count" style="line-height: 48px;"></span>
+            <span id="item5-count-number"></span>
+            <div class="item-name"></div>
+        </div>
+        <div class="inventory-item" data-item="item6">
+            <span id="item6-count" style="line-height: 48px;"></span>
+            <span id="item6-count-number"></span>
+            <div class="item-name"></div>
+        </div>
+        <div class="inventory-item" data-item="item7">
+            <span id="item7-count" style="line-height: 48px;"></span>
+            <span id="item7-count-number"></span>
+            <div class="item-name"></div>
+        </div>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+
+</html>
