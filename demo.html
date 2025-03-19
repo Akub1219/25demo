@@ -173,17 +173,30 @@
             border: 2px solid #6b7280;
             border-radius: 5px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             font-size: 24px;
             cursor: pointer;
             /* クラフト可能を示す */
             margin-left: 20px;
+            position: relative;
         }
         
         #craft-result.active {
             background-color: #86ef7d;
             /* クラフト可能な時の色 */
+        }
+        
+        #craft-result .result-icon {
+            font-size: 24px;
+            line-height: 24px;
+        }
+        
+        #craft-result .result-count {
+            font-size: 14px;
+            line-height: 14px;
+            margin-top: 5px;
         }
         
         .close-button {
@@ -716,13 +729,22 @@
             selectedSlots = [];
             // クラフト開始時に素材使用フラグをリセット
             materialsUsed = false;
-            updateCraftResult();
+
             // グリッドのリセット
             Array.from(craftGrid.children).forEach(slot => {
                 slot.classList.remove('active');
                 slot.textContent = ''; // アイテム表示を消去
                 slot.removeAttribute('data-item-type');
             });
+
+            // クラフト結果をリセット
+            craftResult.innerHTML = '';
+            const resultIcon = document.createElement('div');
+            resultIcon.className = 'result-icon';
+            resultIcon.textContent = '？';
+            craftResult.appendChild(resultIcon);
+            craftResult.classList.remove('active');
+            craftResult.removeAttribute('data-recipe');
 
             // インベントリをクラフト画面にコピー
             updateCraftInventory();
@@ -809,6 +831,16 @@
             const slots = Array.from(craftGrid.children);
             const activeSlots = slots.filter(slot => slot.classList.contains('active'));
 
+            // クラフト結果表示をクリア
+            craftResult.innerHTML = '';
+
+            // 結果アイコンと個数の要素を作成
+            const resultIcon = document.createElement('div');
+            resultIcon.className = 'result-icon';
+
+            const resultCount = document.createElement('div');
+            resultCount.className = 'result-count';
+
             // すべてのスロットが埋まっているか確認
             if (activeSlots.length === 4) {
                 // すべてのスロットのアイテムタイプを取得
@@ -817,38 +849,49 @@
                 // レシピをチェック
                 if (itemTypes.every(type => type === 'wood')) {
                     // 木材4つで板材4つ
-                    craftResult.textContent = '板材×4';
+                    resultIcon.textContent = itemIcons["plank"];
+                    resultCount.textContent = '×4';
                     craftResult.classList.add('active');
                     craftResult.setAttribute('data-recipe', 'wood-to-plank');
                 } else if (itemTypes.every(type => type === 'plank')) {
                     // 板材4つでクラフトテーブル
-                    craftResult.textContent = '🪑';
+                    resultIcon.textContent = '🪑';
+                    resultCount.textContent = '×1';
                     craftResult.classList.add('active');
                     craftResult.setAttribute('data-recipe', 'plank-to-table');
                 } else if (itemTypes.filter(type => type === 'wood').length === 2 &&
                     itemTypes.filter(type => type === 'rock').length === 2) {
                     // 木材2つと石2つで斧
-                    craftResult.textContent = '🪓';
+                    resultIcon.textContent = '🪓';
+                    resultCount.textContent = '×1';
                     craftResult.classList.add('active');
                     craftResult.setAttribute('data-recipe', 'axe');
                 } else {
                     // 他のレシピは未対応
-                    craftResult.textContent = '？';
+                    resultIcon.textContent = '？';
+                    resultCount.textContent = '';
                     craftResult.classList.remove('active');
                     craftResult.removeAttribute('data-recipe');
                 }
             } else {
                 // スロットが埋まっていない場合
-                craftResult.textContent = '？';
+                resultIcon.textContent = '？';
+                resultCount.textContent = '';
                 craftResult.classList.remove('active');
                 craftResult.removeAttribute('data-recipe');
             }
+
+            // 結果表示に要素を追加
+            craftResult.appendChild(resultIcon);
+            craftResult.appendChild(resultCount);
 
             // デバッグ用: クラフト結果の状態をログ
             console.log("クラフト結果更新:", {
                 activeSlots: activeSlots.length,
                 recipeType: craftResult.getAttribute('data-recipe'),
-                isActive: craftResult.classList.contains('active')
+                isActive: craftResult.classList.contains('active'),
+                icon: resultIcon.textContent,
+                count: resultCount.textContent
             });
         }
 
@@ -884,7 +927,11 @@
                 });
 
                 // クラフト結果をリセット
-                craftResult.textContent = '？';
+                craftResult.innerHTML = '';
+                const resultIcon = document.createElement('div');
+                resultIcon.className = 'result-icon';
+                resultIcon.textContent = '？';
+                craftResult.appendChild(resultIcon);
                 craftResult.classList.remove('active');
                 craftResult.removeAttribute('data-recipe');
 
