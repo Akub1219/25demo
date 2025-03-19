@@ -500,6 +500,8 @@
         const craftArea = document.getElementById('craft-area');
         let selectedSlots = [];
         let selectedItem = 'wood'; // 初期選択アイテムはwood
+        // クラフト素材が使用済みかどうかのフラグ
+        let materialsUsed = false;
         const inventoryItems = {
             wood: 0,
             plank: 0,
@@ -509,19 +511,24 @@
         const inventorySlots = ["wood", "plank", "rock", "item4"];
 
         function updateInventory() {
-            const woodCountElement = document.getElementById('wood-count');
-            const plankCountElement = document.getElementById('plank-count');
-            const rockCountElement = document.getElementById('rock-count');
-            const item4CountElement = document.getElementById('item4-count');
-            const woodCountNumberElement = document.getElementById('wood-count-number');
-            const plankCountNumberElement = document.getElementById('plank-count-number');
-            const rockCountNumberElement = document.getElementById('rock-count-number');
-            const inventoryItemsElement = document.querySelectorAll('.inventory-item');
-            inventoryItemsElement.forEach((item, index) => {
+            // デバッグ用: 更新前のインベントリ状態をログに出力
+            console.log("インベントリ更新前:", {
+                wood: woodCount,
+                plank: plankCount,
+                rock: rockCount,
+                item4: item4Count
+            });
+
+            // マップ画面のインベントリアイテムを取得
+            const mapInventoryItems = document.querySelectorAll('.inventory > .inventory-item');
+
+            // マップ画面のインベントリ更新
+            mapInventoryItems.forEach((item, index) => {
                 if (index < inventorySlots.length) {
                     const itemType = inventorySlots[index];
                     let count = 0;
                     let icon = '';
+
                     if (itemType === "wood") {
                         count = woodCount;
                         icon = itemIcons["wood"];
@@ -535,15 +542,35 @@
                         count = item4Count;
                         icon = itemIcons["item4"];
                     }
+
+                    // アイコンと数量を更新
+                    const iconSpan = item.querySelector('span:first-child');
+                    const countSpan = item.querySelector('span:nth-child(2)');
+
                     if (count > 0) {
-                        item.querySelector('span').textContent = icon;
-                        item.querySelectorAll('span')[1].textContent = count;
+                        iconSpan.textContent = icon;
+                        countSpan.textContent = count;
                     } else {
-                        item.querySelector('span').textContent = '';
-                        item.querySelectorAll('span')[1].textContent = '';
+                        iconSpan.textContent = '';
+                        countSpan.textContent = '';
                     }
                 }
             });
+
+            // クラフト画面が表示されている場合は、そのインベントリも更新
+            if (craftScreen.style.display === 'flex') {
+                updateCraftInventory();
+            }
+
+            // デバッグ用: 更新後のインベントリ表示をログに出力
+            console.log("インベントリ更新後の表示 (Map):", Array.from(mapInventoryItems).map(item => {
+                const iconSpan = item.querySelector('span:first-child');
+                const countSpan = item.querySelector('span:nth-child(2)');
+                return {
+                    icon: iconSpan.textContent,
+                    count: countSpan.textContent
+                };
+            }));
         }
 
         // クラフト画面用のインベントリを更新する関数
@@ -591,6 +618,18 @@
                 if (count > 0) {
                     iconSpan.textContent = icon;
                     countSpan.textContent = count;
+
+                    // アイテムが存在する場合のみクリックイベントを追加
+                    item.addEventListener('click', () => {
+                        // アイテムを素材スロットにセット
+                        addItemToGrid(itemType, icon);
+
+                        // 視覚的なフィードバック（オプション）
+                        document.querySelectorAll('#craft-inventory .inventory-item').forEach(el => {
+                            el.style.border = '1px solid #9ca3af';
+                        });
+                        item.style.border = '2px solid #3b82f6';
+                    });
                 }
 
                 itemName.textContent = nameText;
@@ -599,20 +638,74 @@
                 item.appendChild(countSpan);
                 item.appendChild(itemName);
 
-                // アイテム選択のイベントリスナー
-                item.addEventListener('click', () => {
-                    if (count > 0) {
-                        selectedItem = itemType;
-                        // 視覚的なフィードバック（オプション）
-                        document.querySelectorAll('#craft-inventory .inventory-item').forEach(el => {
-                            el.style.border = '1px solid #9ca3af';
-                        });
-                        item.style.border = '2px solid #3b82f6';
-                    }
-                });
-
                 craftInventory.appendChild(item);
             });
+
+            // デバッグ用: クラフト画面のインベントリ更新をログ
+            console.log("クラフト画面インベントリ更新:", {
+                wood: woodCount,
+                plank: plankCount,
+                rock: rockCount,
+                item4: item4Count
+            });
+        }
+
+        // インベントリからグリッドにアイテムを追加する関数
+        function addItemToGrid(itemType, icon) {
+            // 対応するアイテムの所持数をチェック
+            let itemCount = 0;
+            if (itemType === "wood") {
+                itemCount = woodCount;
+            } else if (itemType === "plank") {
+                itemCount = plankCount;
+            } else if (itemType === "rock") {
+                itemCount = rockCount;
+            } else if (itemType === "item4") {
+                itemCount = item4Count;
+            }
+
+            // アイテムが1つ以上あるか確認
+            if (itemCount <= 0) {
+                return;
+            }
+
+            // 空いているスロットを探す
+            const slots = Array.from(craftGrid.children);
+            const emptySlots = slots.filter(slot => !slot.classList.contains('active'));
+
+            if (emptySlots.length > 0) {
+                // 空いているスロットの最初のものを使用
+                const slot = emptySlots[0];
+                const slotIndex = slots.indexOf(slot);
+
+                // スロットにアイテムをセット
+                slot.classList.add('active');
+                slot.textContent = icon;
+                slot.setAttribute('data-item-type', itemType);
+
+                // 選択されたスロットの配列に追加
+                if (!selectedSlots.includes(slotIndex)) {
+                    selectedSlots.push(slotIndex);
+                }
+
+                // アイテムカウントを減らす
+                if (itemType === "wood") {
+                    woodCount--;
+                } else if (itemType === "plank") {
+                    plankCount--;
+                } else if (itemType === "rock") {
+                    rockCount--;
+                } else if (itemType === "item4") {
+                    item4Count--;
+                }
+
+                // インベントリ表示を更新
+                updateInventory();
+                updateCraftInventory();
+
+                // クラフト結果を更新
+                updateCraftResult();
+            }
         }
 
         // 初期状態でインベントリを更新
@@ -621,11 +714,14 @@
         craftButton.addEventListener('click', () => {
             craftScreen.style.display = 'flex';
             selectedSlots = [];
+            // クラフト開始時に素材使用フラグをリセット
+            materialsUsed = false;
             updateCraftResult();
             // グリッドのリセット
             Array.from(craftGrid.children).forEach(slot => {
                 slot.classList.remove('active');
                 slot.textContent = ''; // アイテム表示を消去
+                slot.removeAttribute('data-item-type');
             });
 
             // インベントリをクラフト画面にコピー
@@ -633,9 +729,44 @@
         });
 
         closeButton.addEventListener('click', () => {
+            // クラフト画面を閉じる前に、スロットに配置された素材をインベントリに戻す
+            // ただし、素材が使用済みの場合は戻さない
+            if (!materialsUsed) {
+                Array.from(craftGrid.children).forEach(slot => {
+                    if (slot.classList.contains('active')) {
+                        const itemType = slot.getAttribute('data-item-type');
+
+                        // アイテムをインベントリに戻す（クラフトをキャンセルした場合）
+                        if (itemType === "wood") {
+                            woodCount++;
+                        } else if (itemType === "plank") {
+                            plankCount++;
+                        } else if (itemType === "rock") {
+                            rockCount++;
+                        } else if (itemType === "item4") {
+                            item4Count++;
+                        }
+
+                        // スロットをリセット
+                        slot.classList.remove('active');
+                        slot.textContent = '';
+                        slot.removeAttribute('data-item-type');
+                    }
+                });
+            }
+
             craftScreen.style.display = 'none';
             // マップ画面のインベントリを更新
             updateInventory();
+
+            // デバッグ用: 現在のインベントリ状態をログに出力
+            console.log("閉じる時のインベントリ状態:", {
+                wood: woodCount,
+                plank: plankCount,
+                rock: rockCount,
+                item4: item4Count,
+                materialsUsed: materialsUsed
+            });
         });
 
         craftGrid.addEventListener('click', (event) => {
@@ -643,54 +774,132 @@
             if (slot.classList.contains('craft-slot')) {
                 const index = Array.from(craftGrid.children).indexOf(slot);
                 if (selectedSlots.includes(index)) {
-                    // すでに選択されているスロットを再度クリックした場合、選択を解除
+                    // すでに選択されているスロットを再度クリックした場合、選択を解除して元のアイテムをインベントリに戻す
                     selectedSlots = selectedSlots.filter(i => i !== index);
+
+                    // 戻すアイテムのタイプを取得
+                    const itemType = slot.getAttribute('data-item-type');
+
+                    // アイテムをインベントリに戻す
+                    if (itemType === "wood") {
+                        woodCount++;
+                    } else if (itemType === "plank") {
+                        plankCount++;
+                    } else if (itemType === "rock") {
+                        rockCount++;
+                    } else if (itemType === "item4") {
+                        item4Count++;
+                    }
+
+                    // スロットをリセット
                     slot.classList.remove('active');
                     slot.textContent = ''; // アイテム表示を消去
-                } else if (selectedSlots.length < 4) { // 最大4個まで選択可能
-                    if (woodCount > 0) {
-                        selectedSlots.push(index);
-                        slot.classList.add('active');
-                        slot.textContent = itemIcons[selectedItem][0]; // アイテムの最初の文字を表示
-                    }
+                    slot.removeAttribute('data-item-type');
+
+                    // インベントリとクラフト結果を更新
+                    updateInventory();
+                    updateCraftInventory();
+                    updateCraftResult();
                 }
-                updateCraftResult();
             }
         });
 
         function updateCraftResult() {
-            selectedSlots.sort(); // スロット番号を昇順にソート
-            if (selectedSlots.length === 4 &&
-                selectedSlots[0] === 0 &&
-                selectedSlots[1] === 1 &&
-                selectedSlots[2] === 2 &&
-                selectedSlots[3] === 3) {
-                craftResult.textContent = '板材×4';
-                craftResult.classList.add('active');
+            // セットされたアイテムのタイプをチェック
+            const slots = Array.from(craftGrid.children);
+            const activeSlots = slots.filter(slot => slot.classList.contains('active'));
+
+            // すべてのスロットが埋まっているか確認
+            if (activeSlots.length === 4) {
+                // すべてのスロットのアイテムタイプを取得
+                const itemTypes = activeSlots.map(slot => slot.getAttribute('data-item-type'));
+
+                // レシピをチェック
+                if (itemTypes.every(type => type === 'wood')) {
+                    // 木材4つで板材4つ
+                    craftResult.textContent = '板材×4';
+                    craftResult.classList.add('active');
+                    craftResult.setAttribute('data-recipe', 'wood-to-plank');
+                } else if (itemTypes.every(type => type === 'plank')) {
+                    // 板材4つでクラフトテーブル
+                    craftResult.textContent = '🪑';
+                    craftResult.classList.add('active');
+                    craftResult.setAttribute('data-recipe', 'plank-to-table');
+                } else if (itemTypes.filter(type => type === 'wood').length === 2 &&
+                    itemTypes.filter(type => type === 'rock').length === 2) {
+                    // 木材2つと石2つで斧
+                    craftResult.textContent = '🪓';
+                    craftResult.classList.add('active');
+                    craftResult.setAttribute('data-recipe', 'axe');
+                } else {
+                    // 他のレシピは未対応
+                    craftResult.textContent = '？';
+                    craftResult.classList.remove('active');
+                    craftResult.removeAttribute('data-recipe');
+                }
             } else {
+                // スロットが埋まっていない場合
                 craftResult.textContent = '？';
                 craftResult.classList.remove('active');
+                craftResult.removeAttribute('data-recipe');
             }
+
+            // デバッグ用: クラフト結果の状態をログ
+            console.log("クラフト結果更新:", {
+                activeSlots: activeSlots.length,
+                recipeType: craftResult.getAttribute('data-recipe'),
+                isActive: craftResult.classList.contains('active')
+            });
         }
 
         craftResult.addEventListener('click', () => {
             if (craftResult.classList.contains('active')) {
-                if (woodCount >= 1) { // 木が1個以上必要
-                    woodCount -= 1;
+                const recipe = craftResult.getAttribute('data-recipe');
+
+                if (recipe === 'wood-to-plank') {
+                    // 木材4つを消費して板材4つを作成
+                    // 注: 素材はすでにグリッドに配置されていて、インベントリから差し引かれている
+                    // ここでは板材を追加するだけでOK
                     plankCount += 4;
-                    updateInventory();
-                    updateCraftInventory(); // クラフト画面のインベントリも更新
-                    selectedSlots = []; // リセット
-                    Array.from(craftGrid.children).forEach(slot => {
-                        slot.classList.remove('active');
-                        slot.textContent = '';
-                    });
-                    craftResult.textContent = '？';
-                    craftResult.classList.remove('active');
                     alert('板材4個をクラフトしました！');
-                } else {
-                    alert('原木が足りません');
+                } else if (recipe === 'plank-to-table') {
+                    // 板材4つを消費してクラフトテーブルを作成
+                    item4Count += 1;
+                    alert('クラフトテーブルを作成しました！');
+                } else if (recipe === 'axe') {
+                    // 木材2つと石2つを消費して斧を作成
+                    item4Count += 1; // 仮にitem4として斧を追加
+                    alert('斧を作成しました！');
                 }
+
+                // 素材使用済みとマーク
+                materialsUsed = true;
+
+                // クラフトグリッドをリセット
+                selectedSlots = [];
+                Array.from(craftGrid.children).forEach(slot => {
+                    slot.classList.remove('active');
+                    slot.textContent = '';
+                    slot.removeAttribute('data-item-type');
+                });
+
+                // クラフト結果をリセット
+                craftResult.textContent = '？';
+                craftResult.classList.remove('active');
+                craftResult.removeAttribute('data-recipe');
+
+                // インベントリを更新
+                updateInventory();
+                updateCraftInventory();
+
+                // デバッグ用: クラフト完了時のインベントリ状態
+                console.log("クラフト完了時のインベントリ状態:", {
+                    wood: woodCount,
+                    plank: plankCount,
+                    rock: rockCount,
+                    item4: item4Count,
+                    materialsUsed: materialsUsed
+                });
             }
         });
     </script>
