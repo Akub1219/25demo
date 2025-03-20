@@ -22,6 +22,7 @@ const parkLocations = [
     [35.6727740590257, 139.72098271529347, "神宮外苑", "wood"],
     [35.673971330419604, 139.72888520021084, "高橋是清翁記念公園", "rock"],
     [35.66712306836001, 139.73243426969967, "檜町公園", "rock"],
+    [35.67290910615022, 139.7259926039698, "赤坂郵便局駐車場", "rock"],
 ];
 // 木のアイコンを保持する配列
 let treeMarkers = [];
@@ -79,8 +80,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🌲',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
+            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
         });
         if (!treeMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -93,8 +94,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🔨',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
+            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
         });
         if (!plankMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -107,8 +108,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🪨',
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
+            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
+            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
         });
         if (!rockMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -118,9 +119,10 @@ parkLocations.forEach(location => {
             rockMarkers.push(marker);
         }
     }
-    if (marker) { // Ensure marker is defined
+    // 以下は変更なし
+    if (marker) {
         marker.parkName = name;
-        marker.resourceType = resourceType; // Store resource type
+        marker.resourceType = resourceType;
         marker.on('click', (event) => {
             const distance = map.distance(characterPosition, [lat, lng]);
             if (distance <= 20) {
@@ -149,7 +151,6 @@ parkLocations.forEach(location => {
         });
     }
 });
-
 // キャラクターの移動処理
 function moveCharacter(e) {
     let newPosition = [...characterPosition];
