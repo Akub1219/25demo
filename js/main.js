@@ -80,8 +80,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🌲',
-            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
-            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
+            iconSize: [64, 64],
+            iconAnchor: [32, 32]
         });
         if (!treeMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -94,8 +94,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🔨',
-            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
-            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
+            iconSize: [64, 64],
+            iconAnchor: [32, 32]
         });
         if (!plankMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -108,8 +108,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🪨',
-            iconSize: [64, 64], // [32, 32]から[64, 64]に変更
-            iconAnchor: [32, 32] // [16, 16]から[32, 32]に変更
+            iconSize: [64, 64],
+            iconAnchor: [32, 32]
         });
         if (!rockMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -119,16 +119,30 @@ parkLocations.forEach(location => {
             rockMarkers.push(marker);
         }
     }
-    // 以下は変更なし
-    if (marker) {
+    if (marker) { // Ensure marker is defined
         marker.parkName = name;
-        marker.resourceType = resourceType;
+        marker.resourceType = resourceType; // Store resource type
         marker.on('click', (event) => {
             const distance = map.distance(characterPosition, [lat, lng]);
             if (distance <= 20) {
                 let count = 2;
                 let message = `【${name}】で`;
-                if (resourceType === "wood") {
+
+                // 石リソースの場合、ツルハシを持っているか確認
+                if (resourceType === "rock") {
+                    // 木のツルハシか石のツルハシを持っているかチェック
+                    const hasWoodenPickaxe = inventoryCounts.wooden_pickaxe > 0;
+                    const hasStonePickaxe = inventoryCounts.item5 > 0;
+
+                    if (!hasWoodenPickaxe && !hasStonePickaxe) {
+                        alert('石を採掘するにはツルハシが必要です！');
+                        return; // 処理を中断
+                    }
+
+                    inventoryCounts.rock += count;
+                    message += `石を${count}つ`;
+                    rockMarkers = rockMarkers.filter(obj => obj !== marker);
+                } else if (resourceType === "wood") {
                     inventoryCounts.wood += count;
                     message += `原木を${count}つ`;
                     treeMarkers = treeMarkers.filter(obj => obj !== marker);
@@ -136,11 +150,8 @@ parkLocations.forEach(location => {
                     inventoryCounts.plank += count;
                     message += `板材を${count}つ`;
                     plankMarkers = plankMarkers.filter(obj => obj !== marker);
-                } else if (resourceType === "rock") {
-                    inventoryCounts.rock += count;
-                    message += `石を${count}つ`;
-                    rockMarkers = rockMarkers.filter(obj => obj !== marker);
                 }
+
                 message += "入手しました！";
                 alert(message);
                 updateInventory();
