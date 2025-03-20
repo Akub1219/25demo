@@ -322,13 +322,24 @@ function updateCraftResult() {
         }
 
         // レシピ4: 板材3つ + 棒2つ → 木のツルハシ1つ
-        else if (activeSlots.length === 5 &&
-            itemTypes.filter(type => type === 'plank').length === 3 &&
-            itemTypes.filter(type => type === 'stick').length === 2) {
-            resultIcon.textContent = itemIcons["wooden_pickaxe"];
-            resultCount.textContent = '×1';
-            craftResult.classList.add('active');
-            craftResult.setAttribute('data-recipe', 'wooden-pickaxe');
+        else if (activeSlots.length === 5) {
+            const plankCount = itemTypes.filter(type => type === 'plank').length;
+            const stickCount = itemTypes.filter(type => type === 'stick').length;
+
+            // ログを出力して状態を確認
+            console.log("レシピ4チェック: ", {
+                totalSlots: activeSlots.length,
+                plankCount: plankCount,
+                stickCount: stickCount,
+                itemTypes: itemTypes
+            });
+
+            if (plankCount === 3 && stickCount === 2) {
+                resultIcon.textContent = itemIcons["wooden_pickaxe"];
+                resultCount.textContent = '×1';
+                craftResult.classList.add('active');
+                craftResult.setAttribute('data-recipe', 'wooden-pickaxe');
+            }
         }
     }
 

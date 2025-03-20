@@ -32,6 +32,8 @@ function openWorkbenchScreen() {
 
     // 作業台インベントリを更新
     updateWorkbenchInventory();
+
+    console.log("作業台画面を開きました");
 }
 
 // 作業台のインベントリを更新する関数
@@ -144,6 +146,8 @@ function addItemToWorkbenchGrid(itemType, icon) {
 
         // 作業台クラフト結果を更新
         updateWorkbenchResult();
+
+        console.log(`アイテム追加: ${itemType} (残り: ${inventoryCounts[itemType]})`);
     }
 }
 
@@ -169,38 +173,85 @@ function updateWorkbenchResult() {
     resultIcon.textContent = '？';
     resultCount.textContent = '';
 
-    // アクティブなスロットをチェック
+    // アクティブなスロット数が0より大きい場合のみ処理
     if (activeSlots.length > 0) {
         // スロットのアイテムタイプを取得
         const itemTypes = activeSlots.map(slot => slot.getAttribute('data-item-type'));
 
-        // 作業台用レシピ1: 石3つ + 棒2つ → 石のツルハシ1つ
-        if (activeSlots.length === 5 &&
-            itemTypes.filter(type => type === 'rock').length === 3 &&
-            itemTypes.filter(type => type === 'stick').length === 2) {
+        // 各アイテムの個数をカウント
+        const rockCount = itemTypes.filter(type => type === 'rock').length;
+        const stickCount = itemTypes.filter(type => type === 'stick').length;
+        const woodCount = itemTypes.filter(type => type === 'wood').length;
+        const plankCount = itemTypes.filter(type => type === 'plank').length;
+
+        // デバッグログ: セットされたアイテムを確認
+        console.log("作業台の現在のアイテム:", {
+            activeSlots: activeSlots.length,
+            itemTypes: itemTypes,
+            rockCount: rockCount,
+            stickCount: stickCount,
+            woodCount: woodCount,
+            plankCount: plankCount
+        });
+
+        // 基本のクラフトレシピも作業台で作れるようにする
+        // レシピ: 木材1つ → 板材4つ
+        if (woodCount === 1 && activeSlots.length === 1) {
+            resultIcon.textContent = itemIcons["plank"];
+            resultCount.textContent = '×4';
+            workbenchResult.classList.add('active');
+            workbenchResult.setAttribute('data-recipe', 'wood-to-plank');
+            console.log("木材→板材のレシピを認識しました");
+        }
+        // レシピ: 板材2つ → 棒1つ
+        else if (plankCount === 2 && activeSlots.length === 2) {
+            resultIcon.textContent = itemIcons["stick"];
+            resultCount.textContent = '×1';
+            workbenchResult.classList.add('active');
+            workbenchResult.setAttribute('data-recipe', 'plank-to-stick');
+            console.log("板材→棒のレシピを認識しました");
+        }
+        // レシピ: 板材4つ → 作業台1つ
+        else if (plankCount === 4 && activeSlots.length === 4) {
+            resultIcon.textContent = itemIcons["workbench"];
+            resultCount.textContent = '×1';
+            workbenchResult.classList.add('active');
+            workbenchResult.setAttribute('data-recipe', 'plank-to-workbench');
+            console.log("板材→作業台のレシピを認識しました");
+        }
+        // レシピ: 板材3つ + 棒2つ → 木のツルハシ1つ
+        else if (plankCount === 3 && stickCount === 2 && activeSlots.length === 5) {
+            resultIcon.textContent = itemIcons["wooden_pickaxe"];
+            resultCount.textContent = '×1';
+            workbenchResult.classList.add('active');
+            workbenchResult.setAttribute('data-recipe', 'wooden-pickaxe');
+            console.log("木のツルハシのレシピを認識しました");
+        }
+        // レシピ: 石3つ + 棒2つ → 石のツルハシ1つ
+        else if (rockCount === 3 && stickCount === 2 && activeSlots.length === 5) {
             resultIcon.textContent = itemIcons["item5"];
             resultCount.textContent = '×1';
             workbenchResult.classList.add('active');
             workbenchResult.setAttribute('data-recipe', 'stone-pickaxe');
+            console.log("石のツルハシのレシピを認識しました");
         }
-
-        // 作業台用レシピ2: 木材4つ + 棒2つ → 木の剣1つ
-        else if (activeSlots.length === 6 &&
-            itemTypes.filter(type => type === 'wood').length === 4 &&
-            itemTypes.filter(type => type === 'stick').length === 2) {
+        // レシピ: 木材4つ + 棒2つ → 木の剣1つ
+        else if (woodCount === 4 && stickCount === 2 && activeSlots.length === 6) {
             resultIcon.textContent = itemIcons["item6"];
             resultCount.textContent = '×1';
             workbenchResult.classList.add('active');
             workbenchResult.setAttribute('data-recipe', 'wooden-sword');
+            console.log("木の剣のレシピを認識しました");
         }
-
-        // 作業台用レシピ3: 板材6つ → 木の盾1つ
-        else if (activeSlots.length === 6 &&
-            itemTypes.every(type => type === 'plank')) {
+        // レシピ: 板材6つ → 木の盾1つ
+        else if (plankCount === 6 && activeSlots.length === 6) {
             resultIcon.textContent = itemIcons["item7"];
             resultCount.textContent = '×1';
             workbenchResult.classList.add('active');
             workbenchResult.setAttribute('data-recipe', 'wooden-shield');
+            console.log("木の盾のレシピを認識しました");
+        } else {
+            console.log("該当するレシピはありません");
         }
     }
 
@@ -218,52 +269,102 @@ function updateWorkbenchResult() {
     });
 }
 
-// 作業台スロットのクリックイベント
-workbenchGrid.addEventListener('click', (event) => {
-    const slot = event.target;
-    if (slot.classList.contains('craft-slot')) {
-        const index = Array.from(workbenchGrid.children).indexOf(slot);
-        if (workbenchSelectedSlots.includes(index)) {
-            // すでに選択されているスロットを再度クリックした場合、選択を解除して元のアイテムをインベントリに戻す
-            workbenchSelectedSlots = workbenchSelectedSlots.filter(i => i !== index);
-
-            // 戻すアイテムのタイプを取得
-            const itemType = slot.getAttribute('data-item-type');
-
-            // アイテムをインベントリに戻す
-            if (itemType) {
-                inventoryCounts[itemType]++;
-            }
-
-            // スロットをリセット
-            slot.classList.remove('active');
-            slot.textContent = '';
-            slot.removeAttribute('data-item-type');
-
-            // インベントリとクラフト結果を更新
-            updateInventory();
-            updateWorkbenchInventory();
-            updateWorkbenchResult();
-        }
-    }
-});
-
 // 作業台クラフト結果のクリックイベント
 workbenchResult.addEventListener('click', () => {
     if (workbenchResult.classList.contains('active')) {
         const recipe = workbenchResult.getAttribute('data-recipe');
+        console.log(`レシピクリック: ${recipe}`);
 
-        if (recipe === 'stone-pickaxe') {
+        if (recipe === 'wood-to-plank') {
+            // 木材1つを消費して板材4つを作成
+            inventoryCounts.plank += 4;
+            alert('板材4個をクラフトしました！');
+        } else if (recipe === 'plank-to-stick') {
+            // 板材2つを消費して棒1つを作成
+            inventoryCounts.stick += 1;
+            alert('棒をクラフトしました！');
+        } else if (recipe === 'plank-to-workbench') {
+            // 板材4つを消費して作業台1つを作成
+            inventoryCounts.workbench += 1;
+            alert('作業台をクラフトしました！');
+        } else if (recipe === 'wooden-pickaxe') {
+            // 板材3つと棒2つを消費して木のツルハシ1つを作成
+            inventoryCounts.wooden_pickaxe += 1;
+            alert('木のツルハシをクラフトしました！');
+        } else if (recipe === 'stone-pickaxe') {
             // 石3つと棒2つを消費して石のツルハシ1つを作成
             inventoryCounts.item5 += 1;
+            // アイテム名のセット
+            itemNames["item5"] = "石のツルハシ";
             alert('石のツルハシをクラフトしました！');
         } else if (recipe === 'wooden-sword') {
             // 木材4つと棒2つを消費して木の剣1つを作成
             inventoryCounts.item6 += 1;
+            // アイテム名のセット
+            itemNames["item6"] = "木の剣";
             alert('木の剣をクラフトしました！');
         } else if (recipe === 'wooden-shield') {
             // 板材6つを消費して木の盾1つを作成
             inventoryCounts.item7 += 1;
+            // アイテム名のセット
+            itemNames["item7"] = "木の盾";
+            alert('木の盾をクラフトしました！');
+        }
+
+        // 素材使用済みとマーク
+        workbenchMaterialsUsed = true;
+
+        // クラフトグリッドをリセット
+        workbenchSelectedSlots = [];
+        Array.from(workbenchGrid.children).forEach(slot => {
+            slot.classList.remove('active');
+            slot.textContent = '';
+            slot.removeAttribute('data-item-type');
+        });
+
+        // クラフト結果をリセット
+        workbenchResult.innerHTML = '';
+        const resultIcon = document.createElement('div');
+        resultIcon.className = 'result-icon';
+        resultIcon.textContent = '？';
+        workbenchResult.appendChild(resultIcon);
+        workbenchResult.classList.remove('active');
+        workbenchResult.removeAttribute('data-recipe');
+
+        // インベントリを更新
+        updateInventory();
+        updateWorkbenchInventory();
+
+        // デバッグ用: クラフト完了時のインベントリ状態
+        console.log("作業台クラフト完了時のインベントリ状態:", {
+            ...inventoryCounts,
+            workbenchMaterialsUsed: workbenchMaterialsUsed
+        });
+    }
+});
+// 作業台クラフト結果のクリックイベント
+workbenchResult.addEventListener('click', () => {
+    if (workbenchResult.classList.contains('active')) {
+        const recipe = workbenchResult.getAttribute('data-recipe');
+        console.log(`レシピクリック: ${recipe}`);
+
+        if (recipe === 'stone-pickaxe') {
+            // 石3つと棒2つを消費して石のツルハシ1つを作成
+            inventoryCounts.item5 += 1;
+            // アイテム名のセット
+            itemNames["item5"] = "石のツルハシ";
+            alert('石のツルハシをクラフトしました！');
+        } else if (recipe === 'wooden-sword') {
+            // 木材4つと棒2つを消費して木の剣1つを作成
+            inventoryCounts.item6 += 1;
+            // アイテム名のセット
+            itemNames["item6"] = "木の剣";
+            alert('木の剣をクラフトしました！');
+        } else if (recipe === 'wooden-shield') {
+            // 板材6つを消費して木の盾1つを作成
+            inventoryCounts.item7 += 1;
+            // アイテム名のセット
+            itemNames["item7"] = "木の盾";
             alert('木の盾をクラフトしました！');
         }
 
@@ -311,6 +412,7 @@ closeWorkbenchButton.addEventListener('click', () => {
                 // アイテムをインベントリに戻す（クラフトをキャンセルした場合）
                 if (itemType) {
                     inventoryCounts[itemType]++;
+                    console.log(`作業台を閉じる: ${itemType}をインベントリに戻します`);
                 }
 
                 // スロットをリセット
