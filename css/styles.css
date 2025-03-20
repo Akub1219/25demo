@@ -458,7 +458,15 @@
     font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-top: 10px;
+    margin-bottom: 10px;
+    /* 上から下に移動したため、マージンを下に変更 */
+    width: 120px;
+    /* ボタンの幅を固定 */
+    display: block;
+    /* ブロック要素にして中央配置しやすくする */
+    margin-left: auto;
+    /* 左右のマージンを自動にして中央揃え */
+    margin-right: auto;
 }
 
 .recipe-button:hover {

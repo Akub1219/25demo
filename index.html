@@ -22,6 +22,8 @@
     <button id="craft-button" class="craft-button">クラフト</button>
     <!-- 通常のクラフト画面 (2x2グリッド) -->
     <div id="craft-screen" class="fixed">
+        <!-- レシピボタンをタイトルの上に移動 -->
+        <button id="recipe-button" class="recipe-button mb-2">レシピ</button>
         <h2 class="text-xl text-white mb-4">クラフト画面</h2>
         <div id="craft-area">
             <div id="craft-grid">
@@ -32,9 +34,7 @@
             </div>
             <div id="craft-result" class=""></div>
         </div>
-        <!-- レシピボタンを追加 -->
-        <button id="recipe-button" class="recipe-button mt-2">レシピ</button>
-        <!-- レシピウィンドウを追加 -->
+        <!-- レシピウィンドウは残したまま -->
         <div id="recipe-window" class="recipe-window">
             <h3 class="text-white mb-2">クラフトレシピ</h3>
             <div id="recipe-list" class="recipe-list"></div>
