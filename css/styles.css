@@ -445,3 +445,125 @@
     position: relative;
     margin-bottom: 30px;
 }
+
+
+/* レシピボタンのスタイル */
+
+.recipe-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.recipe-button:hover {
+    background-color: #45a049;
+}
+
+
+/* レシピウィンドウのスタイル */
+
+.recipe-window {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1100;
+    max-width: 80%;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+
+/* レシピリストのスタイル */
+
+.recipe-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+
+/* レシピアイテムのスタイル */
+
+.recipe-item {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    padding: 5px;
+}
+
+.recipe-item.available {
+    background-color: #fff;
+    border: 2px solid #4CAF50;
+}
+
+.recipe-item.unavailable {
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 2px solid #ff0000;
+}
+
+.recipe-item-icon {
+    font-size: 24px;
+    line-height: 30px;
+}
+
+.recipe-item-count {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.recipe-item-name {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.recipe-item:hover .recipe-item-name {
+    opacity: 1;
+}
+
+
+/* レシピウィンドウの閉じるボタン */
+
+.close-recipe-button {
+    background-color: #f87171;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.close-recipe-button:hover {
+    background-color: #ef4444;
+}
