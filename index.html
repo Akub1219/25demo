@@ -47,6 +47,8 @@
 
     <!-- 作業台のクラフト画面 (3x2グリッド) -->
     <div id="workbench-screen" class="fixed">
+        <!-- レシピボタンをタイトルの上に配置 -->
+        <button id="workbench-recipe-button" class="recipe-button mb-2">レシピ</button>
         <h2 class="text-xl text-white mb-4">作業台</h2>
         <div id="workbench-area">
             <div id="workbench-grid">
@@ -58,6 +60,12 @@
                 <div class="craft-slot" data-x="2" data-y="1"></div>
             </div>
             <div id="workbench-result" class=""></div>
+        </div>
+        <!-- 作業台用レシピウィンドウ -->
+        <div id="workbench-recipe-window" class="recipe-window">
+            <h3 class="text-white mb-2">作業台レシピ</h3>
+            <div id="workbench-recipe-list" class="recipe-list"></div>
+            <button id="close-workbench-recipe-button" class="close-recipe-button">閉じる</button>
         </div>
         <!-- 作業台画面内にインベントリコンテナを追加 -->
         <div id="workbench-inventory" class="inventory-container mt-4"></div>

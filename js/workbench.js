@@ -8,6 +8,85 @@ const workbenchArea = document.getElementById('workbench-area');
 let workbenchSelectedSlots = []; // 作業台用の選択スロット配列
 let workbenchMaterialsUsed = false; // 作業台用のフラグ
 
+// 作業台レシピ機能の変数定義
+const workbenchRecipeButton = document.getElementById('workbench-recipe-button');
+const workbenchRecipeWindow = document.getElementById('workbench-recipe-window');
+const workbenchRecipeList = document.getElementById('workbench-recipe-list');
+const closeWorkbenchRecipeButton = document.getElementById('close-workbench-recipe-button');
+
+// 作業台レシピの定義（通常のクラフトも含む）
+const workbenchRecipes = [
+    // 通常のクラフトレシピも作業台で利用可能
+    {
+        id: 'wood-to-plank',
+        name: '板材',
+        icon: itemIcons['plank'],
+        result: { type: 'plank', count: 4 },
+        materials: [{ type: 'wood', count: 1 }],
+        description: '木材1個から板材4個を作成'
+    },
+    {
+        id: 'plank-to-stick',
+        name: '棒',
+        icon: itemIcons['stick'],
+        result: { type: 'stick', count: 1 },
+        materials: [{ type: 'plank', count: 2 }],
+        description: '板材2個から棒1個を作成'
+    },
+    {
+        id: 'plank-to-workbench',
+        name: '作業台',
+        icon: itemIcons['workbench'],
+        result: { type: 'workbench', count: 1 },
+        materials: [{ type: 'plank', count: 4 }],
+        description: '板材4個から作業台1個を作成'
+    },
+    {
+        id: 'wooden-pickaxe',
+        name: '木のツルハシ',
+        icon: itemIcons['wooden_pickaxe'],
+        result: { type: 'wooden_pickaxe', count: 1 },
+        materials: [
+            { type: 'plank', count: 3 },
+            { type: 'stick', count: 2 }
+        ],
+        description: '板材3個と棒2個から木のツルハシ1個を作成'
+    },
+    // 作業台専用のレシピ
+    {
+        id: 'stone-pickaxe',
+        name: '石のツルハシ',
+        icon: itemIcons['item5'],
+        result: { type: 'item5', count: 1 },
+        materials: [
+            { type: 'rock', count: 3 },
+            { type: 'stick', count: 2 }
+        ],
+        description: '石3個と棒2個から石のツルハシ1個を作成'
+    },
+    {
+        id: 'wooden-sword',
+        name: '木の剣',
+        icon: itemIcons['item6'],
+        result: { type: 'item6', count: 1 },
+        materials: [
+            { type: 'wood', count: 4 },
+            { type: 'stick', count: 2 }
+        ],
+        description: '木材4個と棒2個から木の剣1個を作成'
+    },
+    {
+        id: 'wooden-shield',
+        name: '木の盾',
+        icon: itemIcons['item7'],
+        result: { type: 'item7', count: 1 },
+        materials: [
+            { type: 'plank', count: 6 }
+        ],
+        description: '板材6個から木の盾1個を作成'
+    }
+];
+
 // 作業台クラフト画面を開く
 function openWorkbenchScreen() {
     workbenchScreen.style.display = 'flex';
@@ -437,3 +516,112 @@ closeWorkbenchButton.addEventListener('click', () => {
     // 素材使用フラグをリセット（次回クラフト用）
     workbenchMaterialsUsed = false;
 });
+
+// 作業台レシピボタンのクリックイベント
+workbenchRecipeButton.addEventListener('click', () => {
+    // レシピリストを更新して表示
+    updateWorkbenchRecipeList();
+    workbenchRecipeWindow.style.display = 'block';
+});
+
+// 作業台レシピウィンドウを閉じるボタン
+closeWorkbenchRecipeButton.addEventListener('click', () => {
+    workbenchRecipeWindow.style.display = 'none';
+});
+
+// 作業台レシピリストを更新する関数
+function updateWorkbenchRecipeList() {
+    // レシピリストをクリア
+    workbenchRecipeList.innerHTML = '';
+
+    // レシピの可用性をチェックして、作成可能なものを先に表示
+    const sortedRecipes = [...workbenchRecipes].sort((a, b) => {
+        const canCraftA = canCraftWorkbenchRecipe(a);
+        const canCraftB = canCraftWorkbenchRecipe(b);
+
+        if (canCraftA && !canCraftB) return -1;
+        if (!canCraftA && canCraftB) return 1;
+        return 0;
+    });
+
+    // レシピをリストに追加
+    sortedRecipes.forEach(recipe => {
+        const canCraft = canCraftWorkbenchRecipe(recipe);
+
+        // レシピアイテム要素の作成
+        const recipeItem = document.createElement('div');
+        recipeItem.className = `recipe-item ${canCraft ? 'available' : 'unavailable'}`;
+        recipeItem.setAttribute('data-recipe-id', recipe.id);
+
+        // アイコン
+        const iconElement = document.createElement('div');
+        iconElement.className = 'recipe-item-icon';
+        iconElement.textContent = recipe.icon;
+
+        // 個数
+        const countElement = document.createElement('div');
+        countElement.className = 'recipe-item-count';
+        countElement.textContent = `×${recipe.result.count}`;
+
+        // アイテム名
+        const nameElement = document.createElement('div');
+        nameElement.className = 'recipe-item-name';
+        nameElement.textContent = recipe.name;
+
+        // レシピアイテムにクリックイベントを追加（作成可能な場合のみ）
+        if (canCraft) {
+            recipeItem.addEventListener('click', () => {
+                // レシピウィンドウを閉じる
+                workbenchRecipeWindow.style.display = 'none';
+
+                // 素材を自動でセット
+                autoSetWorkbenchRecipeMaterials(recipe);
+            });
+        }
+
+        // 要素を追加
+        recipeItem.appendChild(iconElement);
+        recipeItem.appendChild(countElement);
+        recipeItem.appendChild(nameElement);
+        workbenchRecipeList.appendChild(recipeItem);
+    });
+}
+
+// 作業台レシピが作成可能かチェックする関数
+function canCraftWorkbenchRecipe(recipe) {
+    return recipe.materials.every(material => {
+        return inventoryCounts[material.type] >= material.count;
+    });
+}
+
+// 作業台に素材を自動でセットする関数
+function autoSetWorkbenchRecipeMaterials(recipe) {
+    // まず現在の素材をインベントリに戻す
+    Array.from(workbenchGrid.children).forEach(slot => {
+        if (slot.classList.contains('active')) {
+            const itemType = slot.getAttribute('data-item-type');
+            if (itemType) {
+                inventoryCounts[itemType]++;
+            }
+            slot.classList.remove('active');
+            slot.textContent = '';
+            slot.removeAttribute('data-item-type');
+        }
+    });
+
+    // 選択スロットをリセット
+    workbenchSelectedSlots = [];
+
+    // 素材を順番にセット
+    recipe.materials.forEach(material => {
+        for (let i = 0; i < material.count; i++) {
+            // インベントリから素材を追加
+            addItemToWorkbenchGrid(material.type, itemIcons[material.type]);
+        }
+    });
+
+    // インベントリと結果を更新
+    updateInventory();
+    updateWorkbenchInventory();
+    updateWorkbenchResult();
+}
