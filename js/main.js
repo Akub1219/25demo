@@ -124,7 +124,7 @@ parkLocations.forEach(location => {
         marker.resourceType = resourceType; // Store resource type
         marker.on('click', (event) => {
             const distance = map.distance(characterPosition, [lat, lng]);
-            if (distance <= 20) {
+            if (distance <= 40) {
                 let count = 2;
                 let message = `【${name}】で`;
 
