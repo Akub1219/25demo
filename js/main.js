@@ -24,6 +24,7 @@ const parkLocations = [
     [35.66712306836001, 139.73243426969967, "檜町公園", "rock"],
     [35.67290910615022, 139.7259926039698, "赤坂郵便局駐車場", "rock"],
 ];
+
 // 木のアイコンを保持する配列
 let treeMarkers = [];
 let plankMarkers = [];
@@ -71,6 +72,37 @@ const itemNames = {
 
 // アイテムタイプの順番（左詰め順）
 const itemOrdering = ["wood", "plank", "stick", "workbench", "wooden_pickaxe", "rock", "item5", "item6", "item7"];
+
+
+
+// ホンダウエルカムプラザ青山の位置に車のアイコンを配置
+const carLocation = [35.67235031877122, 139.7239866927539]; // ホンダウエルカムプラザ青山
+
+// 車のアイコンを作成
+const carIcon = L.divIcon({
+    className: 'car-icon',
+    html: '<img src="img/car.png" width="64" height="64" alt="車">',
+    iconSize: [64, 64],
+    iconAnchor: [32, 32]
+});
+
+// 車のマーカーを作成
+const carMarker = L.marker(carLocation, {
+    icon: carIcon,
+    draggable: false
+}).addTo(map);
+
+
+// クリックイベントを追加（オプション）
+carMarker.on('click', () => {
+    const distance = map.distance(characterPosition, carLocation);
+    if (distance <= 50) { // 50は取得可能距離
+        alert('ホンダウエルカムプラザ青山の車：作成者 Taro');
+        // ここに何らかの特別なアクションを追加できます
+    } else {
+        alert('もう少し近づいてください！');
+    }
+});
 
 // 公園の位置に資源を配置
 parkLocations.forEach(location => {
