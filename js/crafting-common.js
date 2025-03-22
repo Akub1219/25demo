@@ -454,10 +454,11 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
                     const iconText = document.createTextNode(itemIcons[material.type]);
                     slot.appendChild(iconText);
 
-                    // アイテム名ツールチップを追加
+                    // アイテム名ツールチップを追加（不足素材用のデータ属性を追加）
                     const itemNameTooltip = document.createElement('div');
                     itemNameTooltip.className = 'item-name';
                     itemNameTooltip.textContent = itemNames[material.type] || material.type;
+                    itemNameTooltip.setAttribute('data-missing', 'true'); // 不足素材であることを示す属性を追加
                     slot.appendChild(itemNameTooltip);
 
                     slot.setAttribute('data-item-type', material.type);

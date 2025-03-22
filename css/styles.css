@@ -203,6 +203,32 @@
     color: #fff;
 }
 
+
+/* 不足している素材のアイテム名表示を調整 */
+
+.craft-slot.missing .item-name {
+    opacity: 0 !important;
+    /* 初期状態では必ず非表示 */
+    z-index: 1010;
+    /* 他の要素より前面に表示 */
+}
+
+.craft-slot.missing:hover .item-name {
+    opacity: 1 !important;
+    /* ホバー時のみ必ず表示 */
+    background-color: rgba(255, 99, 71, 0.9);
+    /* 不足素材用の背景色 */
+    border-color: #ff3b30;
+}
+
+
+/* 不足素材スロットのスタイル調整 */
+
+.craft-slot.missing {
+    position: relative;
+    /* 位置指定コンテキストを確実に設定 */
+}
+
 #craft-result {
     width: 50px;
     /* 結果表示エリアの幅 */
