@@ -58,7 +58,7 @@
 .craft-button {
     position: fixed;
     /* 画面に固定 */
-    bottom: 20px;
+    bottom: 15px;
     /* 下からの距離 */
     left: 50%;
     /* 水平方向中央 */
@@ -66,19 +66,22 @@
     /* 水平方向中央揃え */
     z-index: 1000;
     /* 他の要素の上に表示 */
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    /* 緑色 */
+    padding: 8px 20px;
+    background-color: #4d6c34;
+    /* 暗い緑色 */
     color: white;
-    border: none;
-    border-radius: 5px;
+    border: 2px solid #8bac65;
+    border-radius: 3px;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     /* 影 */
-    transition: background-color 0.3s ease;
+    transition: all 0.2s ease;
     /* 滑らかな変化 */
     font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
 }
 
 .craft-button:hover {
@@ -124,22 +127,23 @@
     gap: 10px;
     /* セルの間隔 */
     padding: 20px;
-    background-color: #3b82f6;
-    /* Tailwindの青色 */
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    background-color: rgba(43, 52, 27, 0.9);
+    /* ゲーム風の暗い緑色 */
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.5);
     /* 影 */
     margin-right: 20px;
+    border: 2px solid #5a5d47;
 }
 
 .craft-slot {
     width: 50px;
     height: 50px;
-    background-color: #fff;
-    /* 白 */
-    border: 2px solid #6b7280;
-    /* Tailwindの灰色 */
-    border-radius: 5px;
+    background-color: rgba(189, 194, 155, 0.6);
+    /* ゲーム風の背景色 */
+    border: 2px solid #5a5d47;
+    /* 枠線 */
+    border-radius: 2px;
     cursor: pointer;
     display: flex;
     /* アイテムを中央に配置するため */
@@ -147,21 +151,24 @@
     align-items: center;
     font-size: 24px;
     /* アイテムのフォントサイズ */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
 .craft-slot.active {
-    background-color: #fef08a;
+    background-color: rgba(221, 199, 105, 0.5);
     /* 選択されたスロットの色 */
+    border-color: #a38a36;
+    box-shadow: inset 0 0 8px rgba(165, 132, 0, 0.5);
 }
 
 #craft-result {
     width: 50px;
     /* 結果表示エリアの幅 */
     height: 50px;
-    background-color: #e5e7eb;
-    /* Tailwindの灰色 */
-    border: 2px solid #6b7280;
-    border-radius: 5px;
+    background-color: rgba(189, 194, 155, 0.3);
+    /* 薄い背景色 */
+    border: 2px solid #5a5d47;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -171,11 +178,14 @@
     /* クラフト可能を示す */
     margin-left: 20px;
     position: relative;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 #craft-result.active {
-    background-color: #86ef7d;
+    background-color: rgba(141, 196, 89, 0.7);
     /* クラフト可能な時の色 */
+    border-color: #4d8c1e;
+    box-shadow: 0 0 10px rgba(77, 140, 30, 0.5), inset 0 0 8px rgba(77, 140, 30, 0.5);
 }
 
 #craft-result .result-icon {
@@ -211,36 +221,75 @@
 }
 
 
-/* マップ画面のインベントリをクラフト画面と同様に横一列表示に変更 */
+/* インベントリコンテナとステータスバー */
 
-.inventory {
+.inventory-container {
     position: fixed;
     bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    background-color: #e5e7eb;
-    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     display: flex;
-    /* gridからflexに変更 */
-    flex-wrap: wrap;
-    /* 必要に応じて折り返し */
+    flex-direction: column;
+    min-width: 480px;
+    /* 最小幅を設定して1行にする */
+}
+
+
+/* ステータスバー */
+
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    background-color: rgba(43, 52, 27, 0.8);
+    border-radius: 5px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.health-bar,
+.hunger-bar {
+    display: flex;
+    align-items: center;
+}
+
+.health-bar span,
+.hunger-bar span {
+    margin: 0 2px;
+    font-size: 18px;
+    line-height: 18px;
+}
+
+
+/* マップ画面のインベントリを1行に固定 */
+
+.inventory {
+    background-color: rgba(50, 59, 33, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-wrap: nowrap;
+    /* 折り返しをなくす */
     gap: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    min-width: 200px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    justify-content: center;
-    /* 中央揃え */
+    overflow-x: auto;
+    /* 横スクロール可能に */
+    justify-content: flex-start;
+    /* 左揃え */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .inventory-item {
     width: 48px;
     height: 48px;
-    background-color: #fff;
-    border: 1px solid #9ca3af;
-    border-radius: 5px;
+    background-color: rgba(189, 194, 155, 0.6);
+    border: 2px solid #5a5d47;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -250,6 +299,14 @@
     cursor: pointer;
     position: relative;
     margin-bottom: 30px;
+    min-width: 48px;
+    /* 最小幅を確保 */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.inventory-item.active {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px #ffd700;
 }
 
 .inventory-item span {
@@ -265,6 +322,8 @@
     bottom: -20px;
     font-size: 12px;
     line-height: 12px;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px black;
 }
 
 .item-name {
@@ -272,15 +331,17 @@
     bottom: -25px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(39, 55, 21, 0.9);
     color: white;
-    padding: 3px 6px;
-    border-radius: 5px;
+    padding: 4px 8px;
+    border-radius: 3px;
     font-size: 12px;
     white-space: nowrap;
     opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
     z-index: 1002;
+    border: 1px solid #7d8046;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .inventory-item:hover .item-name {
@@ -294,14 +355,16 @@
     display: flex;
     gap: 10px;
     margin-top: 20px;
-    background-color: #e5e7eb;
+    background-color: rgba(50, 59, 33, 0.9);
     padding: 10px;
-    border-radius: 10px;
-    min-width: 200px;
+    border-radius: 5px;
+    min-width: 480px;
     max-width: 600px;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
     z-index: 1002;
+    box-sizing: border-box;
 }
 
 
@@ -310,9 +373,9 @@
 .empty-slot {
     width: 48px;
     height: 48px;
-    background-color: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 5px;
+    background-color: rgba(189, 194, 155, 0.3);
+    border: 2px solid #5a5d47;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -321,6 +384,8 @@
     user-select: none;
     position: relative;
     margin-bottom: 30px;
+    min-width: 48px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -353,19 +418,20 @@
     grid-template-rows: repeat(2, 50px);
     gap: 10px;
     padding: 20px;
-    background-color: #8b5cf6;
+    background-color: rgba(74, 45, 97, 0.9);
     /* 紫色を使って通常のクラフト画面と区別 */
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.5);
     margin-right: 20px;
+    border: 2px solid #54366e;
 }
 
 #workbench-result {
     width: 50px;
     height: 50px;
-    background-color: #e5e7eb;
-    border: 2px solid #6b7280;
-    border-radius: 5px;
+    background-color: rgba(189, 194, 155, 0.3);
+    border: 2px solid #5a5d47;
+    border-radius: 2px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -374,10 +440,14 @@
     cursor: pointer;
     margin-left: 20px;
     position: relative;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 #workbench-result.active {
-    background-color: #86ef7d;
+    background-color: rgba(141, 196, 89, 0.7);
+    /* クラフト可能な時の色 */
+    border-color: #4d8c1e;
+    box-shadow: 0 0 10px rgba(77, 140, 30, 0.5), inset 0 0 8px rgba(77, 140, 30, 0.5);
 }
 
 #workbench-result .result-icon {
@@ -417,33 +487,16 @@
     display: flex;
     gap: 10px;
     margin-top: 20px;
-    background-color: #e5e7eb;
+    background-color: rgba(50, 59, 33, 0.9);
     padding: 10px;
-    border-radius: 10px;
-    min-width: 200px;
-    max-width: 600px;
-    flex-wrap: wrap;
-    justify-content: center;
-    z-index: 1002;
-}
-
-
-/* 空のインベントリスロット用のスタイル */
-
-.empty-slot {
-    width: 48px;
-    height: 48px;
-    background-color: #fff;
-    border: 1px solid #d1d5db;
     border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    user-select: none;
-    position: relative;
-    margin-bottom: 30px;
+    min-width: 480px;
+    max-width: 600px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    z-index: 1002;
+    box-sizing: border-box;
 }
 
 

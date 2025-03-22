@@ -88,54 +88,68 @@
         <button class="close-workbench-button">閉じる</button>
     </div>
 
-    <div class="inventory">
-        <div class="inventory-item" data-item="wood">
-            <span id="wood-count" style="font-size: 24px; line-height: 48px;"></span>
-            <span id="wood-count-number"></span>
-            <div class="item-name">原木</div>
+    <div class="inventory-container">
+        <!-- 上部メーターバー -->
+        <div class="status-bar">
+            <div class="health-bar">
+                <span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span>
+                <span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span><span>❤️</span>
+            </div>
+            <div class="hunger-bar">
+                <span>🍗</span><span>🍗</span><span>🍗</span><span>🍗</span><span>🍗</span>
+                <span>🍗</span><span>🍗</span><span>🍗</span><span>🍗</span><span>🍗</span>
+            </div>
         </div>
-        <div class="inventory-item" data-item="plank">
-            <span id="plank-count" style="line-height: 48px;"></span>
-            <span id="plank-count-number"></span>
-            <div class="item-name">板材</div>
-        </div>
-        <div class="inventory-item" data-item="stick">
-            <span id="stick-count" style="line-height: 48px;"></span>
-            <span id="stick-count-number"></span>
-            <div class="item-name">棒</div>
-        </div>
-        <div class="inventory-item" data-item="workbench">
-            <span id="workbench-count" style="line-height: 48px;"></span>
-            <span id="workbench-count-number"></span>
-            <div class="item-name">作業台</div>
-        </div>
-        <div class="inventory-item" data-item="wooden_pickaxe">
-            <span id="wooden-pickaxe-count" style="line-height: 48px;"></span>
-            <span id="wooden-pickaxe-count-number"></span>
-            <div class="item-name">木のツルハシ</div>
-        </div>
-        <div class="inventory-item" data-item="rock">
-            <span id="rock-count" style="line-height: 48px;"></span>
-            <span id="rock-count-number"></span>
-            <div class="item-name">石</div>
-        </div>
-        <div class="inventory-item" data-item="item5">
-            <span id="item5-count" style="line-height: 48px;"></span>
-            <span id="item5-count-number"></span>
-            <div class="item-name"></div>
-        </div>
-        <div class="inventory-item" data-item="item6">
-            <span id="item6-count" style="line-height: 48px;"></span>
-            <span id="item6-count-number"></span>
-            <div class="item-name"></div>
-        </div>
-        <div class="inventory-item" data-item="item7">
-            <span id="item7-count" style="line-height: 48px;"></span>
-            <span id="item7-count-number"></span>
-            <div class="item-name"></div>
+
+        <!-- インベントリアイテム -->
+        <div class="inventory">
+            <div class="inventory-item" data-item="wood">
+                <span id="wood-count" style="font-size: 24px; line-height: 48px;"></span>
+                <span id="wood-count-number"></span>
+                <div class="item-name">原木</div>
+            </div>
+            <div class="inventory-item" data-item="plank">
+                <span id="plank-count" style="line-height: 48px;"></span>
+                <span id="plank-count-number"></span>
+                <div class="item-name">板材</div>
+            </div>
+            <div class="inventory-item" data-item="stick">
+                <span id="stick-count" style="line-height: 48px;"></span>
+                <span id="stick-count-number"></span>
+                <div class="item-name">棒</div>
+            </div>
+            <div class="inventory-item" data-item="workbench">
+                <span id="workbench-count" style="line-height: 48px;"></span>
+                <span id="workbench-count-number"></span>
+                <div class="item-name">作業台</div>
+            </div>
+            <div class="inventory-item" data-item="wooden_pickaxe">
+                <span id="wooden-pickaxe-count" style="line-height: 48px;"></span>
+                <span id="wooden-pickaxe-count-number"></span>
+                <div class="item-name">木のツルハシ</div>
+            </div>
+            <div class="inventory-item" data-item="rock">
+                <span id="rock-count" style="line-height: 48px;"></span>
+                <span id="rock-count-number"></span>
+                <div class="item-name">石</div>
+            </div>
+            <div class="inventory-item" data-item="item5">
+                <span id="item5-count" style="line-height: 48px;"></span>
+                <span id="item5-count-number"></span>
+                <div class="item-name"></div>
+            </div>
+            <div class="inventory-item" data-item="item6">
+                <span id="item6-count" style="line-height: 48px;"></span>
+                <span id="item6-count-number"></span>
+                <div class="item-name"></div>
+            </div>
+            <div class="inventory-item" data-item="item7">
+                <span id="item7-count" style="line-height: 48px;"></span>
+                <span id="item7-count-number"></span>
+                <div class="item-name"></div>
+            </div>
         </div>
     </div>
-
     <!-- JavaScriptファイルを分割して読み込み（順番に注意） -->
     <script src="js/main.js"></script>
     <script src="js/crafting-common.js"></script>

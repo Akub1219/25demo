@@ -216,6 +216,12 @@ function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateRe
 
 // クラフト画面用のインベントリを更新する共通関数
 function updateCraftingInventory(inventoryElement, addItemFunc) {
+    // スタイルを強制的に適用（水平方向のフレックスボックス）
+    inventoryElement.style.display = 'flex';
+    inventoryElement.style.flexWrap = 'nowrap';
+    inventoryElement.style.flexDirection = 'row';
+    inventoryElement.style.overflowX = 'auto';
+
     inventoryElement.innerHTML = ''; // 既存の内容をクリア
 
     // アイテムの順番に基づいて、実際のインベントリの有効なアイテムリストを作成
@@ -232,6 +238,14 @@ function updateCraftingInventory(inventoryElement, addItemFunc) {
         }
     });
 
+    // 横に一行でアイテムを表示するためのコンテナを作成
+    const itemsContainer = document.createElement('div');
+    itemsContainer.style.display = 'flex';
+    itemsContainer.style.flexDirection = 'row';
+    itemsContainer.style.flexWrap = 'nowrap';
+    itemsContainer.style.gap = '10px';
+    itemsContainer.style.width = '100%';
+
     // 9個のスロットを作成（アイテムがあるものとないもの）
     for (let i = 0; i < 9; i++) {
         let item;
@@ -241,6 +255,7 @@ function updateCraftingInventory(inventoryElement, addItemFunc) {
             item = document.createElement('div');
             item.className = 'inventory-item';
             item.setAttribute('data-item', activeItems[i].type);
+            item.style.flexShrink = '0'; // 横幅を維持
 
             const iconSpan = document.createElement('span');
             iconSpan.style.fontSize = '24px';
@@ -258,12 +273,6 @@ function updateCraftingInventory(inventoryElement, addItemFunc) {
             item.addEventListener('click', () => {
                 // アイテムを素材スロットにセット
                 addItemFunc(activeItems[i].type, activeItems[i].icon);
-
-                // 視覚的なフィードバック
-                document.querySelectorAll(`#${inventoryElement.id} .inventory-item`).forEach(el => {
-                    el.style.border = '1px solid #9ca3af';
-                });
-                item.style.border = '2px solid #3b82f6';
             });
 
             item.appendChild(iconSpan);
@@ -273,18 +282,22 @@ function updateCraftingInventory(inventoryElement, addItemFunc) {
             // 空のスロット
             item = document.createElement('div');
             item.className = 'empty-slot';
+            item.style.flexShrink = '0'; // 横幅を維持
         }
 
-        inventoryElement.appendChild(item);
+        itemsContainer.appendChild(item);
     }
+
+    // コンテナをインベントリに追加
+    inventoryElement.appendChild(itemsContainer);
 
     // デバッグ用: クラフト画面のインベントリ更新をログ
     console.log(`${inventoryElement.id} インベントリ更新:`, {
         activeItems: activeItems.length,
-        totalSlots: 9
+        totalSlots: 9,
+        layout: 'horizontal row'
     });
 }
-
 // レシピが作成可能かチェックする共通関数
 function canCraftRecipe(recipe) {
     return recipe.materials.every(material => {
