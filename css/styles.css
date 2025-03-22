@@ -38,20 +38,20 @@
 /* 木のアイコンのスタイル */
 
 .tree-icon {
-    width: 64px;
-    /* 32pxから64pxに変更 */
-    height: 64px;
-    /* 32pxから64pxに変更 */
+    width: 48px;
+    /* 64pxから48pxに変更 */
+    height: 48px;
+    /* 64pxから48pxに変更 */
     border-radius: 50%;
     cursor: pointer;
     user-select: none;
     position: absolute;
     z-index: 100;
     transform: translate(-50%, -50%);
-    font-size: 48px;
-    /* 24pxから48pxに変更 */
-    line-height: 64px;
-    /* 32pxから64pxに変更 */
+    font-size: 36px;
+    /* 48pxから36pxに変更 */
+    line-height: 48px;
+    /* 64pxから48pxに変更 */
     text-align: center;
 }
 

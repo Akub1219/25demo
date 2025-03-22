@@ -185,8 +185,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🌲',
-            iconSize: [64, 64],
-            iconAnchor: [32, 32]
+            iconSize: [48, 48],
+            iconAnchor: [24, 24]
         });
         if (!treeMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -199,8 +199,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🔨',
-            iconSize: [64, 64],
-            iconAnchor: [32, 32]
+            iconSize: [48, 48],
+            iconAnchor: [24, 24]
         });
         if (!plankMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
@@ -213,8 +213,8 @@ parkLocations.forEach(location => {
         icon = L.divIcon({
             className: 'tree-icon',
             html: '🪨',
-            iconSize: [64, 64],
-            iconAnchor: [32, 32]
+            iconSize: [48, 48],
+            iconAnchor: [24, 24]
         });
         if (!rockMarkers.find(m => m.getLatLng().lat === lat && m.getLatLng().lng === lng)) {
             marker = L.marker([lat, lng], {
