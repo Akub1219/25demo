@@ -100,6 +100,8 @@ function updateCraftResult() {
     // セットされたアイテムのタイプをチェック
     const slots = Array.from(craftGrid.children);
     const activeSlots = slots.filter(slot => slot.classList.contains('active'));
+    const missingSlots = slots.filter(slot => slot.classList.contains('missing'));
+    const totalFilledSlots = activeSlots.length + missingSlots.length;
 
     // クラフト結果表示をクリア
     craftResult.innerHTML = '';
@@ -117,46 +119,57 @@ function updateCraftResult() {
     resultIcon.textContent = '？';
     resultCount.textContent = '';
 
-    // アクティブなスロットをチェック
-    if (activeSlots.length > 0) {
-        // スロットのアイテムタイプを取得
-        const itemTypes = activeSlots.map(slot => slot.getAttribute('data-item-type'));
+    // 不足している素材がないか確認
+    const hasMissingMaterials = missingSlots.length > 0;
 
-        // 各アイテムの個数をカウント
-        const woodCount = itemTypes.filter(type => type === 'wood').length;
-        const plankCount = itemTypes.filter(type => type === 'plank').length;
-        const stickCount = itemTypes.filter(type => type === 'stick').length;
+    // アイテムタイプを取得
+    const activeItemTypes = activeSlots.map(slot => slot.getAttribute('data-item-type'));
+    const missingItemTypes = missingSlots.map(slot => slot.getAttribute('data-item-type'));
+    const allItemTypes = [...activeItemTypes, ...missingItemTypes];
 
-        // レシピ1: 木材1つ → 板材4つ
-        if (activeSlots.length === 1 && woodCount === 1) {
-            resultIcon.textContent = itemIcons["plank"];
-            resultCount.textContent = '×4';
+    // 各アイテムの個数をカウント
+    const woodCount = allItemTypes.filter(type => type === 'wood').length;
+    const plankCount = allItemTypes.filter(type => type === 'plank').length;
+    const stickCount = allItemTypes.filter(type => type === 'stick').length;
+
+    // 結果の表示判定（hasMissingMaterialsがtrueの場合は結果を表示するが'active'クラスは付与しない）
+    let resultRecipe = null;
+
+    // レシピ1: 木材1つ → 板材4つ
+    if (totalFilledSlots === 1 && woodCount === 1) {
+        resultIcon.textContent = itemIcons["plank"];
+        resultCount.textContent = '×4';
+        resultRecipe = 'wood-to-plank';
+    }
+    // レシピ2: 板材4つ → 作業台1つ
+    else if (totalFilledSlots === 4 && plankCount === 4) {
+        resultIcon.textContent = itemIcons["workbench"];
+        resultCount.textContent = '×1';
+        resultRecipe = 'plank-to-workbench';
+    }
+    // レシピ3: 板材2つ → 棒1つ
+    else if (totalFilledSlots === 2 && plankCount === 2) {
+        resultIcon.textContent = itemIcons["stick"];
+        resultCount.textContent = '×1';
+        resultRecipe = 'plank-to-stick';
+    }
+    // レシピ4: 板材3つ + 棒2つ → 木のツルハシ1つ
+    else if (totalFilledSlots === 5 && plankCount === 3 && stickCount === 2) {
+        resultIcon.textContent = itemIcons["wooden_pickaxe"];
+        resultCount.textContent = '×1';
+        resultRecipe = 'wooden-pickaxe';
+    }
+
+    // レシピが認識された場合
+    if (resultRecipe) {
+        craftResult.setAttribute('data-recipe', resultRecipe);
+
+        // 素材が不足していなければアクティブにする
+        if (!hasMissingMaterials) {
             craftResult.classList.add('active');
-            craftResult.setAttribute('data-recipe', 'wood-to-plank');
-        }
-
-        // レシピ2: 板材4つ → 作業台1つ
-        else if (activeSlots.length === 4 && plankCount === 4) {
-            resultIcon.textContent = itemIcons["workbench"];
-            resultCount.textContent = '×1';
-            craftResult.classList.add('active');
-            craftResult.setAttribute('data-recipe', 'plank-to-workbench');
-        }
-
-        // レシピ3: 板材2つ → 棒1つ
-        else if (activeSlots.length === 2 && plankCount === 2) {
-            resultIcon.textContent = itemIcons["stick"];
-            resultCount.textContent = '×1';
-            craftResult.classList.add('active');
-            craftResult.setAttribute('data-recipe', 'plank-to-stick');
-        }
-
-        // レシピ4: 板材3つ + 棒2つ → 木のツルハシ1つ
-        else if (activeSlots.length === 5 && plankCount === 3 && stickCount === 2) {
-            resultIcon.textContent = itemIcons["wooden_pickaxe"];
-            resultCount.textContent = '×1';
-            craftResult.classList.add('active');
-            craftResult.setAttribute('data-recipe', 'wooden-pickaxe');
+        } else {
+            // 不足している場合はクラフト不可のスタイルを適用
+            craftResult.classList.add('incomplete');
         }
     }
 
@@ -167,8 +180,11 @@ function updateCraftResult() {
     // デバッグ用: クラフト結果の状態をログ
     console.log("クラフト結果更新:", {
         activeSlots: activeSlots.length,
+        missingSlots: missingSlots.length,
         recipeType: craftResult.getAttribute('data-recipe'),
         isActive: craftResult.classList.contains('active'),
+        isIncomplete: craftResult.classList.contains('incomplete'),
+        hasMissingMaterials: hasMissingMaterials,
         icon: resultIcon.textContent,
         count: resultCount.textContent
     });

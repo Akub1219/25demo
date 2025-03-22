@@ -137,6 +137,7 @@ function resetCraftingResult(resultElement) {
     resultIcon.textContent = '？';
     resultElement.appendChild(resultIcon);
     resultElement.classList.remove('active');
+    resultElement.classList.remove('incomplete');
     resultElement.removeAttribute('data-recipe');
 }
 
@@ -344,16 +345,14 @@ function updateRecipeList(recipes, recipeListElement, recipeWindowElement, autoS
         nameElement.className = 'recipe-item-name';
         nameElement.textContent = recipe.name;
 
-        // レシピアイテムにクリックイベントを追加（作成可能な場合のみ）
-        if (canCraft) {
-            recipeItem.addEventListener('click', () => {
-                // レシピウィンドウを閉じる
-                recipeWindowElement.style.display = 'none';
+        // すべてのレシピアイテムにクリックイベントを追加（可能・不可能に関わらず）
+        recipeItem.addEventListener('click', () => {
+            // レシピウィンドウを閉じる
+            recipeWindowElement.style.display = 'none';
 
-                // 素材を自動でセット
-                autoSetMaterialsFunc(recipe);
-            });
-        }
+            // 素材を自動でセット（不足分も含めて）
+            autoSetMaterialsFunc(recipe);
+        });
 
         // 要素を追加
         recipeItem.appendChild(iconElement);
@@ -367,12 +366,14 @@ function updateRecipeList(recipes, recipeListElement, recipeWindowElement, autoS
 function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItemFunc, updateResultFunc) {
     // まず現在の素材をインベントリに戻す
     Array.from(gridElement.children).forEach(slot => {
-        if (slot.classList.contains('active')) {
+        if (slot.classList.contains('active') || slot.classList.contains('missing')) {
             const itemType = slot.getAttribute('data-item-type');
-            if (itemType) {
+            // 不足分の素材はインベントリに戻さない
+            if (itemType && !slot.classList.contains('missing')) {
                 inventoryCounts[itemType]++;
             }
             slot.classList.remove('active');
+            slot.classList.remove('missing');
             slot.textContent = '';
             slot.removeAttribute('data-item-type');
         }
@@ -381,11 +382,64 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
     // 選択スロットをリセット
     selectedSlotsArray.length = 0;
 
-    // 素材を順番にセット
+    // 素材アイテムの必要数とインベントリの所持数を計算
+    const materialNeeds = {};
     recipe.materials.forEach(material => {
+        if (!materialNeeds[material.type]) {
+            materialNeeds[material.type] = 0;
+        }
+        materialNeeds[material.type] += material.count;
+    });
+
+    // 各素材の所持数と必要数をログに出力
+    console.log("レシピ素材所持状況:", Object.keys(materialNeeds).map(type => ({
+        type,
+        needed: materialNeeds[type],
+        available: inventoryCounts[type]
+    })));
+
+    // スロット数チェック
+    const totalMaterialsCount = recipe.materials.reduce((sum, material) => sum + material.count, 0);
+    const availableSlots = gridElement.children.length;
+
+    if (totalMaterialsCount > availableSlots) {
+        // スロット数が不足している場合は警告を表示
+        alert(`この${recipe.name}レシピには${totalMaterialsCount}個の素材が必要ですが、このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
+        return;
+    }
+
+    // 素材を順番にセット
+    let slotsUsed = 0;
+    recipe.materials.forEach(material => {
+        let available = inventoryCounts[material.type];
         for (let i = 0; i < material.count; i++) {
-            // インベントリから素材を追加
-            addItemFunc(material.type, itemIcons[material.type]);
+            if (slotsUsed >= availableSlots) {
+                console.warn("利用可能なスロットを超えました");
+                break;
+            }
+
+            if (available > 0) {
+                // 所持している素材をセット
+                addItemFunc(material.type, itemIcons[material.type]);
+                available--;
+            } else {
+                // 不足している素材を表示（赤背景）
+                const slots = Array.from(gridElement.children);
+                const emptySlots = slots.filter(slot => !slot.classList.contains('active') && !slot.classList.contains('missing'));
+
+                if (emptySlots.length > 0) {
+                    const slot = emptySlots[0];
+                    const slotIndex = slots.indexOf(slot);
+
+                    // 不足分は赤背景で表示
+                    slot.classList.add('missing');
+                    slot.textContent = itemIcons[material.type];
+                    slot.setAttribute('data-item-type', material.type);
+
+                    // 選択スロット配列には追加しない
+                    slotsUsed++;
+                }
+            }
         }
     });
 
@@ -396,6 +450,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
 // クラフト結果のクリック処理（共通部分）
 function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsArray, gridElement) {
+    // 'active'クラスがある場合のみクラフト可能
     if (resultElement.classList.contains('active')) {
         const recipeId = resultElement.getAttribute('data-recipe');
 
@@ -412,6 +467,7 @@ function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsAr
         selectedSlotsArray.length = 0;
         Array.from(gridElement.children).forEach(slot => {
             slot.classList.remove('active');
+            slot.classList.remove('missing');
             slot.textContent = '';
             slot.removeAttribute('data-item-type');
         });
@@ -421,5 +477,9 @@ function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsAr
 
         // インベントリを更新
         updateInventory();
+    }
+    // 'incomplete'クラスがある場合は素材不足のメッセージを表示
+    else if (resultElement.classList.contains('incomplete')) {
+        alert('素材が不足しているため、クラフトできません！');
     }
 }
