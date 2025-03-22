@@ -19,7 +19,22 @@
 <body class="bg-gray-100 font-sans antialiased">
     <div id="map"></div>
     <div id="character" class="character-icon">👦</div>
-    <button id="craft-button" class="craft-button">クラフト</button>
+    <div class="button-container">
+        <button id="craft-button" class="craft-button">クラフト</button>
+        <button id="creative-button" class="creative-button">クリエイティブ</button>
+    </div>
+
+    <!-- クリエイティブモード説明モーダル -->
+    <div id="creative-modal" class="modal">
+        <div class="modal-content creative-modal-content">
+            <span class="close-modal" id="close-creative-modal">&times;</span>
+            <div class="creative-container">
+                <h2>クリエイティブモード</h2>
+                <img id="creative-image" src="img/creative_mode.png" alt="クリエイティブモード">
+                <p>***クリエイティブモード***は、建築やものづくりに特化して遊べるモードです</p>
+            </div>
+        </div>
+    </div>
 
     <!-- 画像詳細表示用モーダルウィンドウ -->
     <div id="image-detail-modal" class="modal">
@@ -150,6 +165,7 @@
             </div>
         </div>
     </div>
+
     <!-- JavaScriptファイルを分割して読み込み（順番に注意） -->
     <script src="js/main.js"></script>
     <script src="js/crafting-common.js"></script>

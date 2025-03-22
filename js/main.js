@@ -79,22 +79,38 @@ const detailImage = document.getElementById('detail-image');
 const detailLocation = document.getElementById('detail-location');
 const detailTitle = document.getElementById('detail-title');
 const detailAuthor = document.getElementById('detail-author');
-const closeModalBtn = document.querySelector('.close-modal');
+const closeModalBtns = document.querySelectorAll('.close-modal');
 
-// モーダルを閉じる処理
-closeModalBtn.addEventListener('click', () => {
-    imageDetailModal.style.display = 'none';
-});
+// モーダルを閉じる処理をすべての .close-modal 要素に適用
+if (closeModalBtns && closeModalBtns.length > 0) {
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // 親モーダルを探して閉じる
+            const modal = btn.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+}
 
 // モーダル外をクリックしても閉じる
 window.addEventListener('click', (event) => {
-    if (event.target === imageDetailModal) {
-        imageDetailModal.style.display = 'none';
-    }
+    // すべてのモーダルに対して適用
+    document.querySelectorAll('.modal').forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
 });
 
 // 画像詳細を表示する関数
 function showImageDetail(markerData) {
+    if (!imageDetailModal || !detailImage || !detailLocation || !detailTitle || !detailAuthor) {
+        console.error('画像詳細モーダルの要素が見つかりません');
+        return;
+    }
+
     // 拡大画像のパスを設定（通常画像のパスから大きいサイズ用のパスを生成）
     const largeImagePath = markerData.imagePath.replace('.png', '_large.png');
 
@@ -351,12 +367,14 @@ function updateInventory() {
     });
 
     // クラフト画面が表示されている場合は、そのインベントリも更新
-    if (craftScreen.style.display === 'flex') {
+    const craftScreen = document.getElementById('craft-screen');
+    if (craftScreen && craftScreen.style.display === 'flex') {
         updateCraftInventory();
     }
 
     // 作業台画面が表示されている場合は、そのインベントリも更新
-    if (workbenchScreen.style.display === 'flex') {
+    const workbenchScreen = document.getElementById('workbench-screen');
+    if (workbenchScreen && workbenchScreen.style.display === 'flex') {
         updateWorkbenchInventory();
     }
 
@@ -380,8 +398,89 @@ function setInventoryItemClickEvents() {
     });
 }
 
-// 初期化処理: マップ画面のインベントリアイテムクリックイベントを設定
+// クリエイティブモード機能のセットアップ
+function setupCreativeMode() {
+    console.log('クリエイティブモードの初期化を開始...');
+
+    // 要素の取得
+    const creativeButton = document.getElementById('creative-button');
+    console.log('クリエイティブボタン:', creativeButton);
+
+    const creativeModal = document.getElementById('creative-modal');
+    console.log('クリエイティブモーダル:', creativeModal);
+
+    const closeCreativeModal = document.getElementById('close-creative-modal');
+    console.log('閉じるボタン:', closeCreativeModal);
+
+    // 要素の存在確認
+    if (!creativeButton) {
+        console.error('クリエイティブボタンが見つかりません');
+        return; // 要素がなければ処理を中断
+    }
+
+    if (!creativeModal) {
+        console.error('クリエイティブモーダルが見つかりません');
+        return; // 要素がなければ処理を中断
+    }
+
+    // クリエイティブボタンのクリックイベント
+    creativeButton.addEventListener('click', () => {
+        console.log('クリエイティブボタンがクリックされました');
+        creativeModal.style.display = 'block';
+    });
+
+    // モーダルの閉じるボタンがある場合はイベントを設定
+    if (closeCreativeModal) {
+        closeCreativeModal.addEventListener('click', () => {
+            console.log('クリエイティブモーダルを閉じます');
+            creativeModal.style.display = 'none';
+        });
+    }
+
+    // モーダル外クリックでの閉じる処理は共通処理で実装済み
+
+    console.log('クリエイティブモード機能を初期化しました');
+}
+
+// 初期化処理: ページ読み込み完了時に実行
 window.addEventListener('load', () => {
+    console.log('ページの読み込みが完了しました');
+
+    // ボタンの表示を確認
+    const craftBtn = document.getElementById('craft-button');
+    const creativeBtn = document.getElementById('creative-button');
+
+    if (craftBtn) {
+        console.log('クラフトボタンが見つかりました');
+        // クラフトボタンの表示を確認
+        console.log('クラフトボタンのスタイル:', getComputedStyle(craftBtn));
+    } else {
+        console.error('クラフトボタンが見つかりません');
+    }
+
+    if (creativeBtn) {
+        console.log('クリエイティブボタンが見つかりました');
+        // クリエイティブボタンの表示を確認
+        console.log('クリエイティブボタンのスタイル:', getComputedStyle(creativeBtn));
+    } else {
+        console.error('クリエイティブボタンが見つかりません');
+    }
+
+    // ボタンコンテナの表示を確認
+    const buttonContainer = document.querySelector('.button-container');
+    if (buttonContainer) {
+        console.log('ボタンコンテナが見つかりました');
+        console.log('ボタンコンテナのスタイル:', getComputedStyle(buttonContainer));
+    } else {
+        console.error('ボタンコンテナが見つかりません');
+    }
+
+    // マップ画面のインベントリアイテムクリックイベントを設定
     setInventoryItemClickEvents();
+
+    // インベントリを更新
     updateInventory();
+
+    // クリエイティブモードボタンとモーダルの設定
+    setupCreativeMode();
 });

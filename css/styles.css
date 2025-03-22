@@ -55,29 +55,35 @@
     text-align: center;
 }
 
-.craft-button {
+
+/* ボタンコンテナ - クラフトとクリエイティブボタンを横に並べる */
+
+.button-container {
     position: fixed;
-    /* 画面に固定 */
     bottom: 15px;
-    /* 下からの距離 */
     left: 50%;
-    /* 水平方向中央 */
     transform: translateX(-50%);
-    /* 水平方向中央揃え */
     z-index: 1000;
-    /* 他の要素の上に表示 */
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    background: transparent;
+    pointer-events: auto;
+}
+
+
+/* クラフトボタンスタイル */
+
+.craft-button {
     padding: 8px 20px;
     background-color: #4d6c34;
-    /* 暗い緑色 */
     color: white;
     border: 2px solid #8bac65;
     border-radius: 3px;
     font-size: 16px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    /* 影 */
     transition: all 0.2s ease;
-    /* 滑らかな変化 */
     font-family: 'Inter', sans-serif;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -87,6 +93,29 @@
 .craft-button:hover {
     background-color: #45a049;
     /* 少し濃い緑 */
+}
+
+
+/* クリエイティブボタン */
+
+.creative-button {
+    padding: 8px 20px;
+    background-color: #3b5998;
+    color: white;
+    border: 2px solid #6d84b4;
+    border-radius: 3px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+.creative-button:hover {
+    background-color: #2d4373;
 }
 
 
@@ -352,7 +381,7 @@
 /* クラフト画面内のインベントリ用スタイル */
 
 #craft-inventory {
-    display: flex;
+    display: flex !important;
     gap: 10px;
     margin-top: 20px;
     background-color: rgba(50, 59, 33, 0.9);
@@ -360,11 +389,13 @@
     border-radius: 5px;
     min-width: 480px;
     max-width: 600px;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
     overflow-x: auto;
     justify-content: flex-start;
     z-index: 1002;
     box-sizing: border-box;
+    width: 100%;
 }
 
 
@@ -484,7 +515,7 @@
 /* 作業台画面内のインベントリ用スタイル */
 
 #workbench-inventory {
-    display: flex;
+    display: flex !important;
     gap: 10px;
     margin-top: 20px;
     background-color: rgba(50, 59, 33, 0.9);
@@ -492,11 +523,13 @@
     border-radius: 5px;
     min-width: 480px;
     max-width: 600px;
-    flex-wrap: nowrap;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
     overflow-x: auto;
     justify-content: flex-start;
     z-index: 1002;
     box-sizing: border-box;
+    width: 100%;
 }
 
 
@@ -722,4 +755,43 @@
 .image-info p {
     margin: 5px 0;
     font-size: 1rem;
+}
+
+
+/* クリエイティブモードモーダル */
+
+.creative-modal-content {
+    background-color: #e9f0f7;
+    border: 3px solid #3b5998;
+}
+
+.creative-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.creative-container h2 {
+    color: #3b5998;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.creative-container img {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.creative-container p {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #333;
+    max-width: 500px;
+    margin: 0 auto;
+    font-weight: 500;
 }
