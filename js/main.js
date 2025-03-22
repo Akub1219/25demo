@@ -75,33 +75,73 @@ const itemOrdering = ["wood", "plank", "stick", "workbench", "wooden_pickaxe", "
 
 
 
-// ホンダウエルカムプラザ青山の位置に車のアイコンを配置
-const carLocation = [35.67235031877122, 139.7239866927539]; // ホンダウエルカムプラザ青山
+// 画像アイコンのマーカーを作成する共通関数
+function createImageMarker(location, imagePath, title, description) {
+    // 画像アイコンを作成
+    const imgIcon = L.divIcon({
+        className: 'image-icon',
+        html: `<img src="${imagePath}" width="64" height="64" alt="${title}">`,
+        iconSize: [64, 64],
+        iconAnchor: [32, 32]
+    });
 
-// 車のアイコンを作成
-const carIcon = L.divIcon({
-    className: 'car-icon',
-    html: '<img src="img/car.png" width="64" height="64" alt="車">',
-    iconSize: [64, 64],
-    iconAnchor: [32, 32]
-});
+    // マーカーを作成
+    const marker = L.marker(location, {
+        icon: imgIcon,
+        draggable: false
+    }).addTo(map);
 
-// 車のマーカーを作成
-const carMarker = L.marker(carLocation, {
-    icon: carIcon,
-    draggable: false
-}).addTo(map);
+    // データを保存
+    marker.title = title;
+    marker.description = description;
 
+    // クリックイベントを追加
+    marker.on('click', () => {
+        const distance = map.distance(characterPosition, location);
+        if (distance <= 50) { // 50は取得可能距離
+            alert(`${title}：${description}`);
+            // ここに何らかの特別なアクションを追加できます
+        } else {
+            alert('もう少し近づいてください！');
+        }
+    });
 
-// クリックイベントを追加（オプション）
-carMarker.on('click', () => {
-    const distance = map.distance(characterPosition, carLocation);
-    if (distance <= 50) { // 50は取得可能距離
-        alert('ホンダウエルカムプラザ青山の車：作成者 Taro');
-        // ここに何らかの特別なアクションを追加できます
-    } else {
-        alert('もう少し近づいてください！');
+    return marker;
+}
+
+// 画像マーカーの配置データ
+const imageMarkers = [{
+        location: [35.67235031877122, 139.7239866927539], // ホンダウエルカムプラザ青山
+        imagePath: "img/car.png",
+        title: "ホンダウエルカムプラザ青山の車",
+        description: "作成者 Taro"
+    },
+    {
+        location: [35.67445798200324, 139.72255009004144], // 港区立青山中学校
+        imagePath: "img/school.png",
+        title: "港区立青山中学校",
+        description: "港区の公立中学校"
+    },
+    {
+        location: [35.671128341719076, 139.72224087900298], // 彌助稲荷大明神
+        imagePath: "img/torii.png",
+        title: "彌助稲荷大明神",
+        description: "青山の由緒ある神社"
     }
+];
+
+// 画像マーカーを保持する配列
+let customImageMarkers = [];
+
+// 画像マーカーを作成
+imageMarkers.forEach(markerData => {
+    const marker = createImageMarker(
+        markerData.location,
+        markerData.imagePath,
+        markerData.title,
+        markerData.description
+    );
+    customImageMarkers.push(marker);
 });
 
 // 公園の位置に資源を配置

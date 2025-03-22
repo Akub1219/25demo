@@ -577,7 +577,30 @@
 }
 
 
-/* 車のアイコンのスタイル */
+/* 画像アイコンのスタイル */
+
+.image-icon {
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+    user-select: none;
+    position: absolute;
+    z-index: 500;
+    /* マップの上、木のアイコンよりやや上の層に表示 */
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+
+/* 後方互換性のための車のアイコンスタイル（image-iconを継承） */
 
 .car-icon {
     width: 64px;
@@ -586,7 +609,6 @@
     user-select: none;
     position: absolute;
     z-index: 500;
-    /* マップの上、木のアイコンよりやや上の層に表示 */
     transform: translate(-50%, -50%);
     display: flex;
     justify-content: center;
