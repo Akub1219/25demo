@@ -73,14 +73,50 @@ const itemNames = {
 // アイテムタイプの順番（左詰め順）
 const itemOrdering = ["wood", "plank", "stick", "workbench", "wooden_pickaxe", "rock", "item5", "item6", "item7"];
 
+// モーダル関連の要素
+const imageDetailModal = document.getElementById('image-detail-modal');
+const detailImage = document.getElementById('detail-image');
+const detailLocation = document.getElementById('detail-location');
+const detailTitle = document.getElementById('detail-title');
+const detailAuthor = document.getElementById('detail-author');
+const closeModalBtn = document.querySelector('.close-modal');
 
+// モーダルを閉じる処理
+closeModalBtn.addEventListener('click', () => {
+    imageDetailModal.style.display = 'none';
+});
+
+// モーダル外をクリックしても閉じる
+window.addEventListener('click', (event) => {
+    if (event.target === imageDetailModal) {
+        imageDetailModal.style.display = 'none';
+    }
+});
+
+// 画像詳細を表示する関数
+function showImageDetail(markerData) {
+    // 拡大画像のパスを設定（通常画像のパスから大きいサイズ用のパスを生成）
+    const largeImagePath = markerData.imagePath.replace('.png', '_large.png');
+
+    // モーダル内の要素に情報をセット
+    detailImage.src = largeImagePath;
+    detailImage.alt = markerData.title;
+    detailLocation.textContent = markerData.location_name;
+    detailTitle.textContent = markerData.artwork_name;
+    detailAuthor.textContent = markerData.author;
+
+    // モーダルを表示
+    imageDetailModal.style.display = 'block';
+}
 
 // 画像アイコンのマーカーを作成する共通関数
-function createImageMarker(location, imagePath, title, description) {
+function createImageMarker(markerData) {
+    const { location, imagePath, location_name, artwork_name, author } = markerData;
+
     // 画像アイコンを作成
     const imgIcon = L.divIcon({
         className: 'image-icon',
-        html: `<img src="${imagePath}" width="64" height="64" alt="${title}">`,
+        html: `<img src="${imagePath}" width="64" height="64" alt="${artwork_name}">`,
         iconSize: [64, 64],
         iconAnchor: [32, 32]
     });
@@ -92,15 +128,14 @@ function createImageMarker(location, imagePath, title, description) {
     }).addTo(map);
 
     // データを保存
-    marker.title = title;
-    marker.description = description;
+    marker.markerData = markerData;
 
     // クリックイベントを追加
     marker.on('click', () => {
         const distance = map.distance(characterPosition, location);
         if (distance <= 50) { // 50は取得可能距離
-            alert(`${title}：${description}`);
-            // ここに何らかの特別なアクションを追加できます
+            // 詳細情報を表示
+            showImageDetail(markerData);
         } else {
             alert('もう少し近づいてください！');
         }
@@ -113,20 +148,23 @@ function createImageMarker(location, imagePath, title, description) {
 const imageMarkers = [{
         location: [35.67235031877122, 139.7239866927539], // ホンダウエルカムプラザ青山
         imagePath: "img/car.png",
-        title: "ホンダウエルカムプラザ青山の車",
-        description: "作成者 Taro"
+        location_name: "ホンダウエルカムプラザ青山",
+        artwork_name: "車",
+        author: "Taro"
     },
     {
         location: [35.67445798200324, 139.72255009004144], // 港区立青山中学校
         imagePath: "img/school.png",
-        title: "港区立青山中学校",
-        description: "港区の公立中学校"
+        location_name: "港区立青山中学校",
+        artwork_name: "校舎",
+        author: "Hanako"
     },
     {
         location: [35.671128341719076, 139.72224087900298], // 彌助稲荷大明神
         imagePath: "img/torii.png",
-        title: "彌助稲荷大明神",
-        description: "青山の由緒ある神社"
+        location_name: "彌助稲荷大明神",
+        artwork_name: "鳥居",
+        author: "Jiro"
     }
 ];
 
@@ -135,12 +173,7 @@ let customImageMarkers = [];
 
 // 画像マーカーを作成
 imageMarkers.forEach(markerData => {
-    const marker = createImageMarker(
-        markerData.location,
-        markerData.imagePath,
-        markerData.title,
-        markerData.description
-    );
+    const marker = createImageMarker(markerData);
     customImageMarkers.push(marker);
 });
 

@@ -20,6 +20,22 @@
     <div id="map"></div>
     <div id="character" class="character-icon">👦</div>
     <button id="craft-button" class="craft-button">クラフト</button>
+
+    <!-- 画像詳細表示用モーダルウィンドウ -->
+    <div id="image-detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="image-detail-container">
+                <img id="detail-image" src="" alt="詳細画像">
+                <div class="image-info">
+                    <h3 id="detail-location">地名</h3>
+                    <p><strong>作品名：</strong><span id="detail-title"></span></p>
+                    <p><strong>作者：</strong><span id="detail-author"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 通常のクラフト画面 (2x2グリッド) -->
     <div id="craft-screen" class="fixed">
         <!-- レシピボタンをタイトルの上に移動 -->
