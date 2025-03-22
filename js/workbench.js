@@ -36,6 +36,30 @@ function updateWorkbenchInventory() {
     updateCraftingInventory(workbenchInventoryElement, addItemToWorkbenchGrid);
 }
 
+// 作業台グリッドのスロットクリック時の処理 (改善版)
+workbenchGrid.addEventListener('click', (event) => {
+    // イベントの発生元がどのスロットかを捕捉する
+    let target = event.target;
+    let slot = null;
+
+    // クリックされた要素かその親要素がcraft-slotクラスを持つ要素かを確認
+    while (target && target !== workbenchGrid) {
+        if (target.classList && (target.classList.contains('craft-slot'))) {
+            slot = target;
+            break;
+        }
+        target = target.parentElement;
+    }
+
+    // スロットが見つかったら処理
+    if (slot) {
+        console.log("作業台クリックイベント捕捉: スロット検出");
+        handleCraftSlotClick(slot, workbenchGrid, workbenchSelectedSlots, updateWorkbenchResult, updateWorkbenchInventory);
+    } else {
+        console.log("作業台クリックイベント捕捉: スロット外の要素がクリックされました", event.target);
+    }
+});
+
 // インベントリから作業台グリッドにアイテムを追加する関数
 function addItemToWorkbenchGrid(itemType, icon) {
     addItemToGrid(itemType, icon, workbenchGrid, workbenchSelectedSlots, updateWorkbenchResult);

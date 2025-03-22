@@ -41,37 +41,29 @@ closeButton.addEventListener('click', () => {
     materialsUsed = closeCraftingScreen(craftScreen, craftGrid, materialsUsed);
 });
 
-// クラフトグリッドのスロットクリック時の処理
+// クラフトグリッドのスロットクリック時の処理 (改善版)
 craftGrid.addEventListener('click', (event) => {
-    const slot = event.target;
-    if (slot.classList.contains('craft-slot')) {
-        const index = Array.from(craftGrid.children).indexOf(slot);
-        if (selectedSlots.includes(index)) {
-            // すでに選択されているスロットを再度クリックした場合、選択を解除して元のアイテムをインベントリに戻す
-            selectedSlots = selectedSlots.filter(i => i !== index);
+    // イベントの発生元がどのスロットかを捕捉する
+    let target = event.target;
+    let slot = null;
 
-            // 戻すアイテムのタイプを取得
-            const itemType = slot.getAttribute('data-item-type');
-
-            // アイテムをインベントリに戻す
-            if (itemType) {
-                inventoryCounts[itemType]++;
-            }
-
-            // スロットをリセット
-            slot.classList.remove('active');
-            slot.textContent = '';
-            slot.innerHTML = '';
-            slot.removeAttribute('data-item-type');
-
-            // インベントリとクラフト結果を更新
-            updateInventory();
-            updateCraftInventory();
-            updateCraftResult();
+    // クリックされた要素かその親要素がcraft-slotクラスを持つ要素かを確認
+    while (target && target !== craftGrid) {
+        if (target.classList && (target.classList.contains('craft-slot'))) {
+            slot = target;
+            break;
         }
+        target = target.parentElement;
+    }
+
+    // スロットが見つかったら処理
+    if (slot) {
+        console.log("クリックイベント捕捉: スロット検出");
+        handleCraftSlotClick(slot, craftGrid, selectedSlots, updateCraftResult, updateCraftInventory);
+    } else {
+        console.log("クリックイベント捕捉: スロット外の要素がクリックされました", event.target);
     }
 });
-
 // クラフト結果クリック時の処理
 craftResult.addEventListener('click', () => {
     // 参照渡しのために materialsUsed をオブジェクトでラップ
@@ -127,6 +119,7 @@ function updateCraftResult() {
 
     // コンテンツリセット
     craftResult.classList.remove('active');
+    craftResult.classList.remove('incomplete');
     craftResult.removeAttribute('data-recipe');
     resultIcon.textContent = '？';
     resultCount.textContent = '';

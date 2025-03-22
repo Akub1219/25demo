@@ -111,6 +111,59 @@ const craftRecipes = {
     }
 };
 
+// クラフトスロットのクリック処理を行う共通関数
+function handleCraftSlotClick(slot, gridElement, selectedSlotsArray, updateResultFunc, updateInventoryFunc) {
+    // クリックされたスロットのインデックスを取得
+    const index = Array.from(gridElement.children).indexOf(slot);
+
+    // デバッグ: クリックされた要素の情報を出力
+    console.log("クリックされた要素:", {
+        element: slot,
+        isActive: slot.classList.contains('active'),
+        isMissing: slot.classList.contains('missing'),
+        itemType: slot.getAttribute('data-item-type'),
+        index: index,
+        inSelectedSlots: selectedSlotsArray.includes(index)
+    });
+
+    // アクティブまたはmissingスロットが対象
+    if (slot.classList.contains('active') || slot.classList.contains('missing')) {
+        // 選択スロット配列にあれば解除する
+        const slotIndex = selectedSlotsArray.indexOf(index);
+        if (slotIndex !== -1) {
+            selectedSlotsArray.splice(slotIndex, 1);
+        }
+
+        // 戻すアイテムのタイプを取得
+        const itemType = slot.getAttribute('data-item-type');
+
+        // 不足分（missing クラス）でない場合のみインベントリに戻す
+        if (itemType && !slot.classList.contains('missing')) {
+            inventoryCounts[itemType]++;
+        }
+
+        // スロットをリセット
+        slot.classList.remove('active');
+        slot.classList.remove('missing');
+        slot.innerHTML = '';
+        slot.removeAttribute('data-item-type');
+
+        // インベントリとクラフト結果を更新
+        updateInventory();
+        if (updateInventoryFunc) updateInventoryFunc();
+        updateResultFunc();
+
+        // デバッグログ
+        console.log("スロット解除完了:", {
+            index: index,
+            selectedSlotsRemaining: selectedSlotsArray
+        });
+
+        return true; // 処理を行った
+    }
+
+    return false; // 処理を行わなかった
+}
 // クラフト画面を開く共通関数
 function openCraftingScreen(screenElement, gridElement, resultElement, selectedSlotsArray) {
     screenElement.style.display = 'flex';
