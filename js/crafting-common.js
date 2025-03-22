@@ -159,6 +159,14 @@ function closeCraftingScreen(screenElement, gridElement, materialsUsed) {
                 slot.textContent = '';
                 slot.removeAttribute('data-item-type');
             }
+
+            // 追加：未所持の素材スロット（赤いマス）もリセット
+            if (slot.classList.contains('missing')) {
+                slot.classList.remove('missing');
+                slot.textContent = '';
+                slot.innerHTML = '';
+                slot.removeAttribute('data-item-type');
+            }
         });
     }
 
@@ -174,7 +182,6 @@ function closeCraftingScreen(screenElement, gridElement, materialsUsed) {
 
     return false; // 素材使用フラグをリセット（次回クラフト用）
 }
-
 // インベントリからグリッドにアイテムを追加する共通関数
 function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateResultFunc) {
     // 対応するアイテムの所持数をチェック

@@ -234,6 +234,13 @@ workbenchResult.addEventListener('click', () => {
 
 // 作業台を閉じるボタンのイベント
 closeWorkbenchButton.addEventListener('click', () => {
+    // 作業台グリッドの全スロットをリセット（active と missing の両方）
+    Array.from(workbenchGrid.children).forEach(slot => {
+        slot.classList.remove('active', 'missing');
+        slot.innerHTML = '';
+        slot.removeAttribute('data-item-type');
+    });
+
     workbenchMaterialsUsed = closeCraftingScreen(workbenchScreen, workbenchGrid, workbenchMaterialsUsed);
 });
 

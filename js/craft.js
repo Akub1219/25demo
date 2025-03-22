@@ -31,6 +31,13 @@ craftButton.addEventListener('click', () => {
 
 // 閉じるボタンクリック時の処理
 closeButton.addEventListener('click', () => {
+    // クラフトグリッドの全スロットをリセット（active と missing の両方）
+    Array.from(craftGrid.children).forEach(slot => {
+        slot.classList.remove('active', 'missing');
+        slot.innerHTML = '';
+        slot.removeAttribute('data-item-type');
+    });
+
     materialsUsed = closeCraftingScreen(craftScreen, craftGrid, materialsUsed);
 });
 
