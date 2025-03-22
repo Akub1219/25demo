@@ -196,7 +196,20 @@ function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateRe
 
         // スロットにアイテムをセット
         slot.classList.add('active');
-        slot.textContent = icon;
+
+        // 中身をクリア
+        slot.innerHTML = '';
+
+        // アイコンをセット
+        const iconElement = document.createTextNode(icon);
+        slot.appendChild(iconElement);
+
+        // アイテム名ツールチップを追加
+        const itemNameTooltip = document.createElement('div');
+        itemNameTooltip.className = 'item-name';
+        itemNameTooltip.textContent = itemNames[itemType] || itemType;
+        slot.appendChild(itemNameTooltip);
+
         slot.setAttribute('data-item-type', itemType);
 
         // 選択されたスロットの配列に追加
@@ -431,9 +444,22 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
                     const slot = emptySlots[0];
                     const slotIndex = slots.indexOf(slot);
 
+                    // スロット内容をクリア
+                    slot.innerHTML = '';
+
                     // 不足分は赤背景で表示
                     slot.classList.add('missing');
-                    slot.textContent = itemIcons[material.type];
+
+                    // アイコンをセット
+                    const iconText = document.createTextNode(itemIcons[material.type]);
+                    slot.appendChild(iconText);
+
+                    // アイテム名ツールチップを追加
+                    const itemNameTooltip = document.createElement('div');
+                    itemNameTooltip.className = 'item-name';
+                    itemNameTooltip.textContent = itemNames[material.type] || material.type;
+                    slot.appendChild(itemNameTooltip);
+
                     slot.setAttribute('data-item-type', material.type);
 
                     // 選択スロット配列には追加しない
@@ -482,4 +508,35 @@ function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsAr
     else if (resultElement.classList.contains('incomplete')) {
         alert('素材が不足しているため、クラフトできません！');
     }
+}
+
+// クラフト結果の更新共通関数（レシピ情報からアイテム名を表示するため）
+function updateCraftResultWithTooltip(resultElement, recipe) {
+    // 結果表示をクリア
+    resultElement.innerHTML = '';
+
+    // 結果アイコンと個数を作成
+    const resultIcon = document.createElement('div');
+    resultIcon.className = 'result-icon';
+
+    const resultCount = document.createElement('div');
+    resultCount.className = 'result-count';
+
+    // アイテム名のツールチップを作成
+    const itemNameTooltip = document.createElement('div');
+    itemNameTooltip.className = 'item-name';
+
+    if (recipe) {
+        resultIcon.textContent = recipe.icon;
+        resultCount.textContent = `×${recipe.result.count}`;
+        itemNameTooltip.textContent = recipe.name;
+    } else {
+        resultIcon.textContent = '？';
+        resultCount.textContent = '';
+    }
+
+    // 要素を追加
+    resultElement.appendChild(resultIcon);
+    resultElement.appendChild(resultCount);
+    resultElement.appendChild(itemNameTooltip);
 }

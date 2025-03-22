@@ -60,11 +60,17 @@ function updateWorkbenchResult() {
     const resultCount = document.createElement('div');
     resultCount.className = 'result-count';
 
+    // アイテム名ツールチップを作成
+    const itemNameTooltip = document.createElement('div');
+    itemNameTooltip.className = 'item-name';
+
     // コンテンツリセット
+    workbenchResult.classList.remove('active');
     workbenchResult.classList.remove('incomplete');
     workbenchResult.removeAttribute('data-recipe');
     resultIcon.textContent = '？';
     resultCount.textContent = '';
+    itemNameTooltip.textContent = '';
 
     // 不足している素材がないか確認
     const hasMissingMaterials = missingSlots.length > 0;
@@ -93,6 +99,8 @@ function updateWorkbenchResult() {
 
     // 結果の表示判定
     let resultRecipe = null;
+    let currentRecipe = null;
+    let allRecipes = [...craftRecipes.basic, ...craftRecipes.advanced];
 
     // 基本のクラフトレシピも作業台で作れるようにする
     // レシピ: 木材1つ → 板材4つ
@@ -100,6 +108,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["plank"];
         resultCount.textContent = '×4';
         resultRecipe = 'wood-to-plank';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("木材→板材のレシピを認識しました");
     }
     // レシピ: 板材2つ → 棒1つ
@@ -107,6 +119,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["stick"];
         resultCount.textContent = '×1';
         resultRecipe = 'plank-to-stick';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("板材→棒のレシピを認識しました");
     }
     // レシピ: 板材4つ → 作業台1つ
@@ -114,6 +130,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["workbench"];
         resultCount.textContent = '×1';
         resultRecipe = 'plank-to-workbench';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("板材→作業台のレシピを認識しました");
     }
     // レシピ: 板材3つ + 棒2つ → 木のツルハシ1つ
@@ -121,6 +141,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["wooden_pickaxe"];
         resultCount.textContent = '×1';
         resultRecipe = 'wooden-pickaxe';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("木のツルハシのレシピを認識しました");
     }
     // レシピ: 石3つ + 棒2つ → 石のツルハシ1つ
@@ -128,6 +152,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["item5"];
         resultCount.textContent = '×1';
         resultRecipe = 'stone-pickaxe';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("石のツルハシのレシピを認識しました");
     }
     // レシピ: 木材4つ + 棒2つ → 木の剣1つ
@@ -135,6 +163,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["item6"];
         resultCount.textContent = '×1';
         resultRecipe = 'wooden-sword';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("木の剣のレシピを認識しました");
     }
     // レシピ: 板材6つ → 木の盾1つ
@@ -142,6 +174,10 @@ function updateWorkbenchResult() {
         resultIcon.textContent = itemIcons["item7"];
         resultCount.textContent = '×1';
         resultRecipe = 'wooden-shield';
+        currentRecipe = allRecipes.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
         console.log("木の盾のレシピを認識しました");
     } else {
         console.log("該当するレシピはありません");
@@ -163,6 +199,7 @@ function updateWorkbenchResult() {
     // 結果表示に要素を追加
     workbenchResult.appendChild(resultIcon);
     workbenchResult.appendChild(resultCount);
+    workbenchResult.appendChild(itemNameTooltip);
 
     // デバッグ用: 作業台クラフト結果の状態をログ
     console.log("作業台クラフト結果更新:", {
@@ -170,7 +207,8 @@ function updateWorkbenchResult() {
         recipeType: workbenchResult.getAttribute('data-recipe'),
         isActive: workbenchResult.classList.contains('active'),
         icon: resultIcon.textContent,
-        count: resultCount.textContent
+        count: resultCount.textContent,
+        name: itemNameTooltip.textContent
     });
 }
 

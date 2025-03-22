@@ -54,6 +54,7 @@ craftGrid.addEventListener('click', (event) => {
             // スロットをリセット
             slot.classList.remove('active');
             slot.textContent = '';
+            slot.innerHTML = '';
             slot.removeAttribute('data-item-type');
 
             // インベントリとクラフト結果を更新
@@ -113,11 +114,16 @@ function updateCraftResult() {
     const resultCount = document.createElement('div');
     resultCount.className = 'result-count';
 
+    // アイテム名ツールチップを作成
+    const itemNameTooltip = document.createElement('div');
+    itemNameTooltip.className = 'item-name';
+
     // コンテンツリセット
     craftResult.classList.remove('active');
     craftResult.removeAttribute('data-recipe');
     resultIcon.textContent = '？';
     resultCount.textContent = '';
+    itemNameTooltip.textContent = '';
 
     // 不足している素材がないか確認
     const hasMissingMaterials = missingSlots.length > 0;
@@ -134,30 +140,47 @@ function updateCraftResult() {
 
     // 結果の表示判定（hasMissingMaterialsがtrueの場合は結果を表示するが'active'クラスは付与しない）
     let resultRecipe = null;
+    let currentRecipe = null;
 
     // レシピ1: 木材1つ → 板材4つ
     if (totalFilledSlots === 1 && woodCount === 1) {
         resultIcon.textContent = itemIcons["plank"];
         resultCount.textContent = '×4';
         resultRecipe = 'wood-to-plank';
+        currentRecipe = craftRecipes.basic.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
     }
     // レシピ2: 板材4つ → 作業台1つ
     else if (totalFilledSlots === 4 && plankCount === 4) {
         resultIcon.textContent = itemIcons["workbench"];
         resultCount.textContent = '×1';
         resultRecipe = 'plank-to-workbench';
+        currentRecipe = craftRecipes.basic.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
     }
     // レシピ3: 板材2つ → 棒1つ
     else if (totalFilledSlots === 2 && plankCount === 2) {
         resultIcon.textContent = itemIcons["stick"];
         resultCount.textContent = '×1';
         resultRecipe = 'plank-to-stick';
+        currentRecipe = craftRecipes.basic.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
     }
     // レシピ4: 板材3つ + 棒2つ → 木のツルハシ1つ
     else if (totalFilledSlots === 5 && plankCount === 3 && stickCount === 2) {
         resultIcon.textContent = itemIcons["wooden_pickaxe"];
         resultCount.textContent = '×1';
         resultRecipe = 'wooden-pickaxe';
+        currentRecipe = craftRecipes.basic.find(r => r.id === resultRecipe);
+        if (currentRecipe) {
+            itemNameTooltip.textContent = currentRecipe.name;
+        }
     }
 
     // レシピが認識された場合
@@ -176,6 +199,7 @@ function updateCraftResult() {
     // 結果表示に要素を追加
     craftResult.appendChild(resultIcon);
     craftResult.appendChild(resultCount);
+    craftResult.appendChild(itemNameTooltip);
 
     // デバッグ用: クラフト結果の状態をログ
     console.log("クラフト結果更新:", {
@@ -186,7 +210,8 @@ function updateCraftResult() {
         isIncomplete: craftResult.classList.contains('incomplete'),
         hasMissingMaterials: hasMissingMaterials,
         icon: resultIcon.textContent,
-        count: resultCount.textContent
+        count: resultCount.textContent,
+        name: itemNameTooltip.textContent
     });
 }
 
