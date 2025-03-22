@@ -169,7 +169,7 @@ const imageMarkers = [{
         author: "Taro"
     },
     {
-        location: [35.67445798200324, 139.72255009004144], // 港区立青山中学校
+        location: [35.67405550640374, 139.72245781022005], // 港区立青山中学校
         imagePath: "img/school.png",
         location_name: "港区立青山中学校",
         artwork_name: "校舎",
