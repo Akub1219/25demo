@@ -24,14 +24,29 @@ function showCustomAlert(message) {
     alertDiv.style.textAlign = 'center';
     alertDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
     alertDiv.style.fontSize = '1.2em';
+    alertDiv.style.display = 'flex';
+    alertDiv.style.flexDirection = 'column';
+    alertDiv.style.alignItems = 'center';
 
     // メッセージを設定
-    alertDiv.innerHTML = message;
+    const messageDiv = document.createElement('div');
+
+    // テキスト内の \n を <br> に変換して改行を保持する
+    // \r\n (Windows)や \n (Unix/Mac) の改行コードに対応
+    const formattedMessage = message.replace(/\r?\n/g, '<br>');
+    messageDiv.innerHTML = formattedMessage;
+
+    messageDiv.style.marginBottom = '15px';
+    messageDiv.style.maxHeight = '60vh'; // 画面の60%を最大高さに設定
+    messageDiv.style.overflowY = 'auto'; // 長いメッセージはスクロール可能に
+    messageDiv.style.width = '100%'; // 幅を100%に設定
+    messageDiv.style.lineHeight = '1.5'; // 行間を広めに設定
+
+    alertDiv.appendChild(messageDiv);
 
     // OKボタンを追加
     const okButton = document.createElement('button');
     okButton.textContent = 'OK';
-    okButton.style.marginTop = '15px';
     okButton.style.padding = '8px 20px';
     okButton.style.backgroundColor = '#4CAF50';
     okButton.style.color = 'white';
@@ -39,6 +54,8 @@ function showCustomAlert(message) {
     okButton.style.borderRadius = '5px';
     okButton.style.cursor = 'pointer';
     okButton.style.fontSize = '1em';
+    okButton.style.width = '100px'; // ボタンの幅を固定
+    okButton.style.marginTop = '10px'; // 上部の余白を追加
 
     // OKボタンのクリックイベント
     okButton.addEventListener('click', () => {
@@ -568,7 +585,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     if (totalMaterialsCount > availableSlots) {
         // スロット数が不足している場合は警告を表示
-        showCustomAlert(`<strong style="color: #ff8c00;">${recipe.name}</strong>には${totalMaterialsCount}個の素材が必要ですが${availableSlots}個のスロットしかありません。<strong style="color: #ff8c00;">作業台</strong>で作成してください。`);
+        showCustomAlert(`<strong style="color: #ff8c00;">${recipe.name}</strong>には${totalMaterialsCount}個の素材が必要ですが、${availableSlots}個のスロットしかありません。<br><br> <strong style="color: #ff8c00;">作業台</strong>で作成してください。`);
         return;
     }
 
