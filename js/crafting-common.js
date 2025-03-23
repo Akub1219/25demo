@@ -1,5 +1,54 @@
 // クラフト機能の共通関数・変数
 
+// カスタムアラート関数を追加
+function showCustomAlert(message) {
+    // 既存のカスタムアラートがあれば削除
+    const existingAlert = document.getElementById('custom-alert');
+    if (existingAlert) {
+        document.body.removeChild(existingAlert);
+    }
+
+    // カスタムアラート要素を作成
+    const alertDiv = document.createElement('div');
+    alertDiv.id = 'custom-alert';
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '50%';
+    alertDiv.style.left = '50%';
+    alertDiv.style.transform = 'translate(-50%, -50%)';
+    alertDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    alertDiv.style.color = 'white';
+    alertDiv.style.padding = '20px';
+    alertDiv.style.borderRadius = '10px';
+    alertDiv.style.zIndex = '2000';
+    alertDiv.style.maxWidth = '80%';
+    alertDiv.style.textAlign = 'center';
+    alertDiv.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    alertDiv.style.fontSize = '1.2em';
+
+    // メッセージを設定
+    alertDiv.innerHTML = message;
+
+    // OKボタンを追加
+    const okButton = document.createElement('button');
+    okButton.textContent = 'OK';
+    okButton.style.marginTop = '15px';
+    okButton.style.padding = '8px 20px';
+    okButton.style.backgroundColor = '#4CAF50';
+    okButton.style.color = 'white';
+    okButton.style.border = 'none';
+    okButton.style.borderRadius = '5px';
+    okButton.style.cursor = 'pointer';
+    okButton.style.fontSize = '1em';
+
+    // OKボタンのクリックイベント
+    okButton.addEventListener('click', () => {
+        document.body.removeChild(alertDiv);
+    });
+
+    alertDiv.appendChild(okButton);
+    document.body.appendChild(alertDiv);
+}
+
 // クラフトレシピの定義（通常のクラフトと作業台で共通）
 const craftRecipes = {
     // 基本レシピ（通常クラフト用）
@@ -79,34 +128,34 @@ const craftRecipes = {
     handlers: {
         'wood-to-plank': () => {
             inventoryCounts.plank += 4;
-            alert('板材4個をクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">板材</strong>」4個をクラフトしました！');
         },
         'plank-to-stick': () => {
             inventoryCounts.stick += 1;
-            alert('棒をクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">棒</strong>」をクラフトしました！');
         },
         'plank-to-workbench': () => {
             inventoryCounts.workbench += 1;
-            alert('作業台をクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">作業台</strong>」をクラフトしました！');
         },
         'wooden-pickaxe': () => {
             inventoryCounts.wooden_pickaxe += 1;
-            alert('木のツルハシをクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">木のツルハシ</strong>」をクラフトしました！');
         },
         'stone-pickaxe': () => {
             inventoryCounts.item5 += 1;
             itemNames["item5"] = "石のツルハシ";
-            alert('石のツルハシをクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">石のツルハシ</strong>」をクラフトしました！');
         },
         'wooden-sword': () => {
             inventoryCounts.item6 += 1;
             itemNames["item6"] = "木の剣";
-            alert('木の剣をクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">木の剣</strong>」をクラフトしました！');
         },
         'wooden-shield': () => {
             inventoryCounts.item7 += 1;
             itemNames["item7"] = "木の盾";
-            alert('木の盾をクラフトしました！');
+            showCustomAlert('「<strong style="color: #ff8c00;">木の盾</strong>」をクラフトしました！');
         }
     }
 };
@@ -477,7 +526,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     if (totalMaterialsCount > availableSlots) {
         // スロット数が不足している場合は警告を表示
-        alert(`この${recipe.name}レシピには${totalMaterialsCount}個の素材が必要ですが、このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
+        showCustomAlert(`この<strong style="color: #ff8c00;">${recipe.name}</strong>レシピには${totalMaterialsCount}個の素材が必要です。このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
         return;
     }
 
@@ -567,7 +616,7 @@ function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsAr
     }
     // 'incomplete'クラスがある場合は素材不足のメッセージを表示
     else if (resultElement.classList.contains('incomplete')) {
-        alert('素材が不足しているため、クラフトできません！');
+        showCustomAlert('素材が不足しているため、クラフトできません！');
     }
 }
 

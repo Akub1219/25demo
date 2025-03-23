@@ -153,7 +153,7 @@ function createImageMarker(markerData) {
             // 詳細情報を表示
             showImageDetail(markerData);
         } else {
-            alert('もう少し近づいてください！');
+            showCustomAlert('もう少し近づいてください！');
         }
     });
 
@@ -247,7 +247,7 @@ parkLocations.forEach(location => {
             const distance = map.distance(characterPosition, [lat, lng]);
             if (distance <= 40) {
                 let count = 2;
-                let message = `【${name}】で`;
+                let message = `<strong style="color: #4CAF50;">${name}</strong>で`;
 
                 // 石リソースの場合、ツルハシを持っているか確認
                 if (resourceType === "rock") {
@@ -256,29 +256,29 @@ parkLocations.forEach(location => {
                     const hasStonePickaxe = inventoryCounts.item5 > 0;
 
                     if (!hasWoodenPickaxe && !hasStonePickaxe) {
-                        alert('石を採掘するにはツルハシが必要です！');
+                        showCustomAlert('石を採掘するには<strong style="color: #ff8c00;">ツルハシ</strong>が必要です！');
                         return; // 処理を中断
                     }
 
                     inventoryCounts.rock += count;
-                    message += `石を${count}つ`;
+                    message += `<strong style="color: #ff8c00;">石</strong>を${count}つ`;
                     rockMarkers = rockMarkers.filter(obj => obj !== marker);
                 } else if (resourceType === "wood") {
                     inventoryCounts.wood += count;
-                    message += `原木を${count}つ`;
+                    message += `<strong style="color: #ff8c00;">原木</strong>を${count}つ`;
                     treeMarkers = treeMarkers.filter(obj => obj !== marker);
                 } else if (resourceType === "plank") {
                     inventoryCounts.plank += count;
-                    message += `板材を${count}つ`;
+                    message += `<strong style="color: #ff8c00;">板材</strong>を${count}つ`;
                     plankMarkers = plankMarkers.filter(obj => obj !== marker);
                 }
 
                 message += "入手しました！";
-                alert(message);
+                showCustomAlert(message);
                 updateInventory();
                 map.removeLayer(marker);
             } else {
-                alert('資源に近づいてタップしてください！');
+                showCustomAlert('資源に近づいてタップしてください！');
             }
         });
     }
