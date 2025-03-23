@@ -525,6 +525,9 @@ function updateRecipeList(recipes, recipeListElement, recipeWindowElement, autoS
 function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItemFunc, updateResultFunc) {
     console.log("レシピによる素材セット開始。現在の選択スロット:", selectedSlotsArray);
 
+    // 選択スロットの配列を完全にクリア
+    selectedSlotsArray.length = 0;
+
     // まず現在の素材をインベントリに戻す
     Array.from(gridElement.children).forEach(slot => {
         if (slot.classList.contains('active') || slot.classList.contains('missing')) {
@@ -536,13 +539,11 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
             }
             slot.classList.remove('active');
             slot.classList.remove('missing');
-            slot.textContent = '';
+            slot.innerHTML = '';
             slot.removeAttribute('data-item-type');
         }
     });
 
-    // 選択スロットをリセット
-    selectedSlotsArray.length = 0;
     console.log("選択スロットをリセットしました");
 
     // 素材アイテムの必要数とインベントリの所持数を計算
@@ -573,9 +574,17 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     // 素材を順番にセット
     let slotsUsed = 0;
+
+    // レシピの素材を種類ごとにまとめて処理
     recipe.materials.forEach(material => {
-        let available = inventoryCounts[material.type];
-        for (let i = 0; i < material.count; i++) {
+        const materialType = material.type;
+        const materialCount = material.count;
+        let available = inventoryCounts[materialType];
+
+        console.log(`素材 ${materialType} を ${materialCount} 個セットします。所持数: ${available}`);
+
+        // 必要な数だけ素材をセット
+        for (let i = 0; i < materialCount; i++) {
             if (slotsUsed >= availableSlots) {
                 console.warn("利用可能なスロットを超えました");
                 break;
@@ -583,11 +592,38 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
             if (available > 0) {
                 // 所持している素材をセット
-                const added = addItemFunc(material.type, itemIcons[material.type]);
-                if (added) {
+                const slots = Array.from(gridElement.children);
+                const emptySlots = slots.filter(slot => !slot.classList.contains('active') && !slot.classList.contains('missing'));
+
+                if (emptySlots.length > 0) {
+                    const slot = emptySlots[0];
+                    const slotIndex = slots.indexOf(slot);
+
+                    // スロットにアイテムをセット
+                    slot.classList.add('active');
+                    slot.innerHTML = '';
+
+                    // アイコンをセット
+                    const iconElement = document.createTextNode(itemIcons[materialType]);
+                    slot.appendChild(iconElement);
+
+                    // アイテム名ツールチップを追加
+                    const itemNameTooltip = document.createElement('div');
+                    itemNameTooltip.className = 'item-name';
+                    itemNameTooltip.textContent = itemNames[materialType] || materialType;
+                    slot.appendChild(itemNameTooltip);
+
+                    slot.setAttribute('data-item-type', materialType);
+
+                    // 選択スロット配列に追加
+                    selectedSlotsArray.push(slotIndex);
+
+                    // インベントリから減らす
+                    inventoryCounts[materialType]--;
                     available--;
                     slotsUsed++;
-                    console.log(`素材 ${material.type} をセットしました。残り: ${available}`);
+
+                    console.log(`素材 ${materialType} をスロット ${slotIndex} にセットしました。残り: ${available}`);
                 }
             } else {
                 // 不足している素材を表示（赤背景）
@@ -605,19 +641,19 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
                     slot.classList.add('missing');
 
                     // アイコンをセット
-                    const iconText = document.createTextNode(itemIcons[material.type]);
+                    const iconText = document.createTextNode(itemIcons[materialType]);
                     slot.appendChild(iconText);
 
                     // アイテム名ツールチップを追加
                     const itemNameTooltip = document.createElement('div');
                     itemNameTooltip.className = 'item-name';
-                    itemNameTooltip.textContent = itemNames[material.type] || material.type;
+                    itemNameTooltip.textContent = itemNames[materialType] || materialType;
                     itemNameTooltip.setAttribute('data-missing', 'true');
                     slot.appendChild(itemNameTooltip);
 
-                    slot.setAttribute('data-item-type', material.type);
+                    slot.setAttribute('data-item-type', materialType);
 
-                    console.log(`不足素材 ${material.type} を表示しました`);
+                    console.log(`不足素材 ${materialType} をスロット ${slotIndex} に表示しました`);
                     slotsUsed++;
                 }
             }

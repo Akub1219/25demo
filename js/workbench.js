@@ -286,10 +286,17 @@ closeWorkbenchButton.addEventListener('click', () => {
 
 // 作業台レシピボタンのクリックイベント
 workbenchRecipeButton.addEventListener('click', () => {
+    console.log("作業台レシピボタンがクリックされました");
+
+    // レシピリストを表示する前に、現在の選択スロットをクリア
+    workbenchSelectedSlots = [];
+
     // レシピリストを更新して表示
     const allRecipes = [...craftRecipes.basic, ...craftRecipes.advanced];
     updateRecipeList(allRecipes, workbenchRecipeList, workbenchRecipeWindow, autoSetWorkbenchRecipeMaterials);
     workbenchRecipeWindow.style.display = 'block';
+
+    console.log("作業台レシピリストを表示しました。選択スロット:", workbenchSelectedSlots);
 });
 
 // 作業台レシピウィンドウを閉じるボタン
@@ -299,5 +306,20 @@ closeWorkbenchRecipeButton.addEventListener('click', () => {
 
 // 作業台に素材を自動でセットする関数
 function autoSetWorkbenchRecipeMaterials(recipe) {
+    console.log("作業台レシピを選択しました:", recipe.id);
+
+    // 選択スロットを完全にリセット
+    workbenchSelectedSlots = [];
+
+    // グリッドをクリア
+    Array.from(workbenchGrid.children).forEach(slot => {
+        slot.classList.remove('active', 'missing');
+        slot.innerHTML = '';
+        slot.removeAttribute('data-item-type');
+    });
+
+    // レシピ素材のセット
     autoSetRecipeMaterials(recipe, workbenchGrid, workbenchSelectedSlots, addItemToWorkbenchGrid, updateWorkbenchResult);
+
+    console.log("作業台レシピのセット完了。選択スロット:", workbenchSelectedSlots);
 }
