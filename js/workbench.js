@@ -17,6 +17,8 @@ const closeWorkbenchRecipeButton = document.getElementById('close-workbench-reci
 
 // 作業台クラフト画面を開く
 function openWorkbenchScreen() {
+    // 作業台を開く時に素材使用フラグをリセットする
+    workbenchMaterialsUsed = false;
     workbenchMaterialsUsed = openCraftingScreen(workbenchScreen, workbenchGrid, workbenchResult, workbenchSelectedSlots);
 
     // グリッドのリセット
@@ -28,7 +30,7 @@ function openWorkbenchScreen() {
     // 作業台インベントリを更新
     updateWorkbenchInventory();
 
-    console.log("作業台画面を開きました");
+    console.log("作業台画面を開きました。素材使用状態:", workbenchMaterialsUsed);
 }
 
 // 作業台のインベントリを更新する関数
@@ -254,18 +256,32 @@ workbenchResult.addEventListener('click', () => {
         ...inventoryCounts,
         workbenchMaterialsUsed: workbenchMaterialsUsed
     });
+
+    // クラフト完了後にフラグをリセットするタイマーを設定
+    setTimeout(() => {
+        workbenchMaterialsUsed = false;
+        console.log("作業台のworkbenchMaterialsUsedフラグをリセットしました:", workbenchMaterialsUsed);
+    }, 500);
 });
 
 // 作業台を閉じるボタンのイベント
 closeWorkbenchButton.addEventListener('click', () => {
-    // 作業台グリッドの全スロットをリセット（active と missing の両方）
-    Array.from(workbenchGrid.children).forEach(slot => {
-        slot.classList.remove('active', 'missing');
-        slot.innerHTML = '';
-        slot.removeAttribute('data-item-type');
-    });
+    console.log("作業台画面を閉じるボタンがクリックされました");
 
+    // グリッドとフラグの状態をログ出力
+    const activeSlots = Array.from(workbenchGrid.children).filter(slot => slot.classList.contains('active'));
+    console.log(`閉じる前の状態: アクティブスロット=${activeSlots.length}, 素材使用=${workbenchMaterialsUsed}, 選択スロット=${workbenchSelectedSlots.length}`);
+
+    // 素材の返却処理
     workbenchMaterialsUsed = closeCraftingScreen(workbenchScreen, workbenchGrid, workbenchMaterialsUsed);
+
+    // 選択スロット配列をクリア
+    workbenchSelectedSlots.length = 0;
+
+    // 素材使用フラグを確実にリセット
+    workbenchMaterialsUsed = false;
+
+    console.log("作業台画面を閉じる処理が完了しました");
 });
 
 // 作業台レシピボタンのクリックイベント

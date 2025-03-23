@@ -17,6 +17,8 @@ const closeRecipeButton = document.getElementById('close-recipe-button');
 
 // クラフトボタンクリック時の処理
 craftButton.addEventListener('click', () => {
+    // クラフト画面を開く時に素材使用フラグをリセットする
+    materialsUsed = false;
     materialsUsed = openCraftingScreen(craftScreen, craftGrid, craftResult, selectedSlots);
 
     // グリッドのリセット
@@ -27,18 +29,28 @@ craftButton.addEventListener('click', () => {
 
     // インベントリをクラフト画面にコピー
     updateCraftInventory();
+
+    console.log("クラフト画面を開きました。素材使用状態:", materialsUsed);
 });
 
 // 閉じるボタンクリック時の処理
 closeButton.addEventListener('click', () => {
-    // クラフトグリッドの全スロットをリセット（active と missing の両方）
-    Array.from(craftGrid.children).forEach(slot => {
-        slot.classList.remove('active', 'missing');
-        slot.innerHTML = '';
-        slot.removeAttribute('data-item-type');
-    });
+    console.log("クラフト画面を閉じるボタンがクリックされました");
 
+    // グリッドとフラグの状態をログ出力
+    const activeSlots = Array.from(craftGrid.children).filter(slot => slot.classList.contains('active'));
+    console.log(`閉じる前の状態: アクティブスロット=${activeSlots.length}, 素材使用=${materialsUsed}, 選択スロット=${selectedSlots.length}`);
+
+    // 素材の返却処理
     materialsUsed = closeCraftingScreen(craftScreen, craftGrid, materialsUsed);
+
+    // 選択スロット配列をクリア
+    selectedSlots.length = 0;
+
+    // 素材使用フラグを確実にリセット
+    materialsUsed = false;
+
+    console.log("クラフト画面を閉じる処理が完了しました");
 });
 
 // クラフトグリッドのスロットクリック時の処理 (改善版)
@@ -82,8 +94,13 @@ craftResult.addEventListener('click', () => {
         ...inventoryCounts,
         materialsUsed: materialsUsed
     });
-});
 
+    // クラフト完了後にフラグをリセットするタイマーを設定
+    setTimeout(() => {
+        materialsUsed = false;
+        console.log("クラフト画面のmaterialsUsedフラグをリセットしました:", materialsUsed);
+    }, 500);
+});
 // クラフト画面用のインベントリを更新する関数
 function updateCraftInventory() {
     updateCraftingInventory(craftInventoryElement, addItemToCraftGrid);

@@ -213,13 +213,31 @@ function handleCraftSlotClick(slot, gridElement, selectedSlotsArray, updateResul
 
     return false; // 処理を行わなかった
 }
+
 // クラフト画面を開く共通関数
 function openCraftingScreen(screenElement, gridElement, resultElement, selectedSlotsArray) {
+    console.log("クラフト画面を開きます");
+
+    // 画面を表示
     screenElement.style.display = 'flex';
+
     // 選択スロットをリセット
     selectedSlotsArray.length = 0;
-    // 素材使用フラグをリセット
-    return false; // materialsUsed の初期値
+
+    // グリッド内の全スロットをクリア
+    Array.from(gridElement.children).forEach(slot => {
+        slot.classList.remove('active', 'missing');
+        slot.innerHTML = '';
+        slot.removeAttribute('data-item-type');
+    });
+
+    // 結果表示もリセット
+    resetCraftingResult(resultElement);
+
+    console.log("クラフト画面を開きました - 初期化完了");
+
+    // 素材使用フラグの初期値
+    return false;
 }
 
 // グリッドをリセットする共通関数
@@ -243,47 +261,60 @@ function resetCraftingResult(resultElement) {
     resultElement.removeAttribute('data-recipe');
 }
 
-// クラフト画面を閉じる共通関数
+// クラフト画面を閉じる共通関数（より安全版）
 function closeCraftingScreen(screenElement, gridElement, materialsUsed) {
-    // 使用済みでない場合、素材をインベントリに戻す
-    if (!materialsUsed) {
-        Array.from(gridElement.children).forEach(slot => {
-            if (slot.classList.contains('active')) {
-                const itemType = slot.getAttribute('data-item-type');
+    console.log("クラフト画面を閉じる処理を開始。素材使用状態:", materialsUsed);
 
-                // アイテムをインベントリに戻す（クラフトをキャンセルした場合）
-                if (itemType) {
-                    inventoryCounts[itemType]++;
-                }
+    // 活性化されたスロットの状態を確認するためのログ
+    const activeSlots = Array.from(gridElement.children).filter(slot => slot.classList.contains('active'));
+    console.log(`アクティブなスロット: ${activeSlots.length}個`);
 
-                // スロットをリセット
-                slot.classList.remove('active');
-                slot.textContent = '';
-                slot.removeAttribute('data-item-type');
+    // 使用済みでない場合のみ、素材をインベントリに戻す
+    if (!materialsUsed && activeSlots.length > 0) {
+        console.log("使用されていない素材をインベントリに戻します");
+
+        // アクティブな各スロットから素材を取得してインベントリに戻す
+        activeSlots.forEach(slot => {
+            const itemType = slot.getAttribute('data-item-type');
+            if (itemType) {
+                console.log(`素材 ${itemType} をインベントリに戻します`);
+                inventoryCounts[itemType]++;
             }
 
-            // 追加：未所持の素材スロット（赤いマス）もリセット
-            if (slot.classList.contains('missing')) {
-                slot.classList.remove('missing');
-                slot.textContent = '';
-                slot.innerHTML = '';
-                slot.removeAttribute('data-item-type');
-            }
+            // スロットをリセット
+            slot.classList.remove('active');
+            slot.innerHTML = '';
+            slot.removeAttribute('data-item-type');
+        });
+    } else if (materialsUsed) {
+        console.log("素材は既に使用済みのため戻しません");
+    } else {
+        console.log("アクティブなスロットがないため戻す素材はありません");
+    }
+
+    // 未所持の素材スロット（赤いマス）もリセット
+    const missingSlots = Array.from(gridElement.children).filter(slot => slot.classList.contains('missing'));
+    if (missingSlots.length > 0) {
+        console.log(`未所持の素材スロット: ${missingSlots.length}個をリセットします`);
+        missingSlots.forEach(slot => {
+            slot.classList.remove('missing');
+            slot.innerHTML = '';
+            slot.removeAttribute('data-item-type');
         });
     }
 
+    // 画面を非表示にする
     screenElement.style.display = 'none';
-    // マップ画面のインベントリを更新
+
+    // インベントリを更新
     updateInventory();
 
-    // デバッグ用: 現在のインベントリ状態をログに出力
-    console.log("閉じる時のインベントリ状態:", {
-        ...inventoryCounts,
-        materialsUsed: materialsUsed
-    });
+    console.log("クラフト画面を閉じました。インベントリ状態:", {...inventoryCounts });
 
-    return false; // 素材使用フラグをリセット（次回クラフト用）
+    // 素材使用フラグをリセット
+    return false;
 }
+
 // インベントリからグリッドにアイテムを追加する共通関数
 function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateResultFunc) {
     // 対応するアイテムの所持数をチェック
@@ -291,7 +322,7 @@ function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateRe
 
     // アイテムが1つ以上あるか確認
     if (itemCount <= 0) {
-        return;
+        return false; // 追加できなかった場合はfalseを返す
     }
 
     // 空いているスロットを探す
@@ -334,7 +365,12 @@ function addItemToGrid(itemType, icon, gridElement, selectedSlotsArray, updateRe
 
         // 結果を更新
         updateResultFunc();
+
+        console.log(`アイテム ${itemType} をグリッドにセットしました。選択スロット:`, selectedSlotsArray);
+        return true; // 追加に成功した場合はtrueを返す
     }
+
+    return false; // 追加できなかった場合はfalseを返す
 }
 
 // クラフト画面用のインベントリを更新する共通関数
@@ -421,6 +457,7 @@ function updateCraftingInventory(inventoryElement, addItemFunc) {
         layout: 'horizontal row'
     });
 }
+
 // レシピが作成可能かチェックする共通関数
 function canCraftRecipe(recipe) {
     return recipe.materials.every(material => {
@@ -486,6 +523,8 @@ function updateRecipeList(recipes, recipeListElement, recipeWindowElement, autoS
 
 // 素材を自動でセットする共通関数
 function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItemFunc, updateResultFunc) {
+    console.log("レシピによる素材セット開始。現在の選択スロット:", selectedSlotsArray);
+
     // まず現在の素材をインベントリに戻す
     Array.from(gridElement.children).forEach(slot => {
         if (slot.classList.contains('active') || slot.classList.contains('missing')) {
@@ -493,6 +532,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
             // 不足分の素材はインベントリに戻さない
             if (itemType && !slot.classList.contains('missing')) {
                 inventoryCounts[itemType]++;
+                console.log(`素材 ${itemType} をインベントリに戻しました`);
             }
             slot.classList.remove('active');
             slot.classList.remove('missing');
@@ -503,6 +543,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     // 選択スロットをリセット
     selectedSlotsArray.length = 0;
+    console.log("選択スロットをリセットしました");
 
     // 素材アイテムの必要数とインベントリの所持数を計算
     const materialNeeds = {};
@@ -526,7 +567,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     if (totalMaterialsCount > availableSlots) {
         // スロット数が不足している場合は警告を表示
-        showCustomAlert(`この<strong style="color: #ff8c00;">${recipe.name}</strong>レシピには${totalMaterialsCount}個の素材が必要です。このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
+        showCustomAlert(`この<strong style="color: #ff8c00;">${recipe.name}</strong>レシピには${totalMaterialsCount}個の素材が必要ですが、このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
         return;
     }
 
@@ -542,8 +583,12 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
             if (available > 0) {
                 // 所持している素材をセット
-                addItemFunc(material.type, itemIcons[material.type]);
-                available--;
+                const added = addItemFunc(material.type, itemIcons[material.type]);
+                if (added) {
+                    available--;
+                    slotsUsed++;
+                    console.log(`素材 ${material.type} をセットしました。残り: ${available}`);
+                }
             } else {
                 // 不足している素材を表示（赤背景）
                 const slots = Array.from(gridElement.children);
@@ -563,16 +608,16 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
                     const iconText = document.createTextNode(itemIcons[material.type]);
                     slot.appendChild(iconText);
 
-                    // アイテム名ツールチップを追加（不足素材用のデータ属性を追加）
+                    // アイテム名ツールチップを追加
                     const itemNameTooltip = document.createElement('div');
                     itemNameTooltip.className = 'item-name';
                     itemNameTooltip.textContent = itemNames[material.type] || material.type;
-                    itemNameTooltip.setAttribute('data-missing', 'true'); // 不足素材であることを示す属性を追加
+                    itemNameTooltip.setAttribute('data-missing', 'true');
                     slot.appendChild(itemNameTooltip);
 
                     slot.setAttribute('data-item-type', material.type);
 
-                    // 選択スロット配列には追加しない
+                    console.log(`不足素材 ${material.type} を表示しました`);
                     slotsUsed++;
                 }
             }
@@ -582,29 +627,34 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
     // インベントリと結果を更新
     updateInventory();
     updateResultFunc();
+
+    console.log("レシピによる素材セット完了。現在の選択スロット:", selectedSlotsArray);
 }
 
 // クラフト結果のクリック処理（共通部分）
 function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsArray, gridElement) {
     // 'active'クラスがある場合のみクラフト可能
     if (resultElement.classList.contains('active')) {
+        console.log("クラフト結果がクリックされました（クラフト可能状態）");
         const recipeId = resultElement.getAttribute('data-recipe');
 
         // 対応するレシピハンドラを実行
         const handler = craftRecipes.handlers[recipeId];
         if (handler) {
+            console.log(`レシピ ${recipeId} のハンドラを実行します`);
             handler();
         }
 
-        // 素材使用済みとマーク
+        // 素材使用済みとマーク (クラフト中のみtrue)
         materialsUsedRef.value = true;
+        console.log("素材を使用済みとしてマークしました");
 
         // クラフトグリッドをリセット
         selectedSlotsArray.length = 0;
         Array.from(gridElement.children).forEach(slot => {
             slot.classList.remove('active');
             slot.classList.remove('missing');
-            slot.textContent = '';
+            slot.innerHTML = '';
             slot.removeAttribute('data-item-type');
         });
 
@@ -613,13 +663,19 @@ function handleCraftResultClick(resultElement, materialsUsedRef, selectedSlotsAr
 
         // インベントリを更新
         updateInventory();
+
+        console.log("クラフト処理が完了しました");
+
+        // 共通関数内でのフラグリセットは削除（各コンポーネントで行う）
     }
     // 'incomplete'クラスがある場合は素材不足のメッセージを表示
     else if (resultElement.classList.contains('incomplete')) {
+        console.log("素材が不足しているためクラフトできません");
         showCustomAlert('素材が不足しているため、クラフトできません！');
+    } else {
+        console.log("クラフト結果がクリックされましたが、有効なレシピではありません");
     }
 }
-
 // クラフト結果の更新共通関数（レシピ情報からアイテム名を表示するため）
 function updateCraftResultWithTooltip(resultElement, recipe) {
     // 結果表示をクリア
