@@ -568,7 +568,7 @@ function autoSetRecipeMaterials(recipe, gridElement, selectedSlotsArray, addItem
 
     if (totalMaterialsCount > availableSlots) {
         // スロット数が不足している場合は警告を表示
-        showCustomAlert(`この<strong style="color: #ff8c00;">${recipe.name}</strong>レシピには${totalMaterialsCount}個の素材が必要ですが、このクラフト画面には${availableSlots}個のスロットしかありません。作業台で作成してください。`);
+        showCustomAlert(`<strong style="color: #ff8c00;">${recipe.name}</strong>には${totalMaterialsCount}個の素材が必要ですが${availableSlots}個のスロットしかありません。<strong style="color: #ff8c00;">作業台</strong>で作成してください。`);
         return;
     }
 
